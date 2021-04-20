@@ -46,20 +46,33 @@ namespace Server.Network
 
             this.OnServerStarted?.Invoke();
 
+            await this.StartListening();
+        }
+
+        private async Task StartListening()
+        {
             while (true)
             {
-                TcpClient client = await this.listener.AcceptTcpClientAsync();
-                IPackage package = this.ReceivePackageAfterConnection(client);
-                    
-                if (!this.dictionaryConnectedClients.ContainsKey(package.IdAuthor))
+                try
                 {
-                    await this.HandleNotConnectedClient(package, client);
+                    TcpClient client = await this.listener.AcceptTcpClientAsync();
+                    IPackage package = this.ReceivePackageAfterConnection(client);
+
+                    if (!this.dictionaryConnectedClients.ContainsKey(package.IdAuthor))
+                    {
+                        await this.HandleNotConnectedClient(package, client);
+                    }
+                    else
+                    {
+                        await this.HandleAlreadyConnectedClient(package, client);
+                    }
                 }
-                else
+                catch
                 {
-                    await this.HandleAlreadyConnectedClient(package, client);
+                    // TODO Логика работы,в ситуации, когда происходит ошибка при попытке подключения клиента
                 }
             }
+            // ReSharper disable once FunctionNeverReturns
         }
 
         private IPackage ReceivePackageAfterConnection(TcpClient client)

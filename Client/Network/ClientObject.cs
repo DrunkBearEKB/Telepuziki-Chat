@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
-using System.Threading.Tasks
-    ;
+using System.Threading.Tasks;
+
 using Network.Extensions;
 using Network.Message;
 using Network.Message.ExchangingMessages;
@@ -19,7 +19,7 @@ namespace Client.Network
         
         private readonly PackageCreator packageCreator;
 
-        public string Id { get; private set; }
+        public readonly string Id;
 
         public ClientObject(string id)
         {
@@ -64,10 +64,10 @@ namespace Client.Network
             while (!this.packageCreator.CanGetPackage)
             {
                 byte[] bytes = new byte[1024];
-                int amountBytesReaded = await this.stream.ReadAsync(bytes, 0, bytes.Length);
-                if (amountBytesReaded != 0)
+                int amountBytesRead = await this.stream.ReadAsync(bytes, 0, bytes.Length);
+                if (amountBytesRead != 0)
                 {
-                    this.packageCreator.Add(bytes, amountBytesReaded);
+                    this.packageCreator.Add(bytes, amountBytesRead);
                 }
             }
         }
