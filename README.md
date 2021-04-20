@@ -11,9 +11,9 @@
 
 **2. Server Application (Console)**
 
-**3. NetworkingLibrary**
+**3. Network (Library)**
 
-**4. CryptingLibrary**
+**4. Crypting (Library)**
 
 **5. DataBase**
 
@@ -26,9 +26,9 @@
 является абстракцией для передачи потока байт по сети, а `IMessage` асбтракция для
 вышестоящего уровня.
 
-**2. Crypting:**
+**2. Crypting:** "позже..."
 
-**3. DataBase:**
+**3. DataBase:** "позже..."
 
 
 ### Участники:
