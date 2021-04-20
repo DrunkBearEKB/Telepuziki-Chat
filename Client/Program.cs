@@ -28,7 +28,7 @@ namespace Client
             while (true)
             {
                 // ReSharper disable once PossibleNullReferenceException
-                var inputParsed = Console.ReadLine().Split();
+                string[] inputParsed = Console.ReadLine().Split();
 
                 if (inputParsed.Length == 1)
                 {

@@ -45,10 +45,6 @@ namespace Network.Package
         [Test]
         public void GetRawFormattedDataOfVoice()
         {
-            foreach (var s in PackageCreator.GetRawFormattedData(
-                PackageType.Voice, new string[] {"abcd", "efghijkl", "12:30", "temp temp"}, new byte[]{ 11, 12, 13, 14, 15}).Select(b => b.ToString()))
-                Console.Write($"{s}, ");
-            
             Assert.AreEqual(
                 new byte[] { 
                     62, 0, 0, 0, 
