@@ -1,10 +1,10 @@
-﻿namespace NetworkLibrary.Common.Package
+﻿namespace Network.Package
 {
     public interface IPackage
     {
         PackageType Type { get; }
         string IdReceiver { get; }
         string IdAuthor { get; }
-        byte[] Data { get; }
+        byte[] RawData { get; }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Media;
 
-namespace NetworkLibrary.Common.Message.ExchangingMessages
+namespace Network.Message.ExchangingMessages
 {
     public class VoiceMessage : IMessage
     {

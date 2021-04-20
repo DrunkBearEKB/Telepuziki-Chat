@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 
-namespace NetworkLibrary.Common.Package.ExchangingPackages
+using Network.Extensions;
+
+namespace Network.Package.ExchangingPackages
 {
     public class FilePackage : IPackage
     {
@@ -9,13 +12,15 @@ namespace NetworkLibrary.Common.Package.ExchangingPackages
         public string IdAuthor { get; }
         public DateTime Time { get; }
         public byte[] Content { get; }
-        public byte[] Data { get; }
+        public byte[] RawData { get; }
 
         public FilePackage(byte[] bytes)
         {
+            List<byte[]> listParsed = PackageCreator.Parse(bytes);
+            
             // TODO Создание конструкторов для FilePackage
             
-            this.Data = bytes;
+            this.RawData = bytes;
         }
     }
 }

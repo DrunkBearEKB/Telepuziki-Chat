@@ -1,4 +1,4 @@
-﻿namespace NetworkLibrary.Common.Message
+﻿namespace Network.Message
 {
     public enum MessageType
     {

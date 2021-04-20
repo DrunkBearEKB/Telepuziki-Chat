@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-using NetworkLibrary.Common.Message;
+using Network.Message;
 
-namespace NetworkLibrary.Server
+namespace Server.History
 {
     public interface IHistory
     {

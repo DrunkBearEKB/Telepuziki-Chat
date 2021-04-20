@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Net.Sockets;
-using System.Text;
+using System.Threading.Tasks;
 
-using NetworkLibrary.Common.Package;
+using Network.Package;
 
-namespace NetworkLibrary
+namespace Network.Extensions
 {
     public static class Extensions
     {
@@ -31,31 +31,14 @@ namespace NetworkLibrary
 
         public static void Write(this NetworkStream stream, IPackage package)
         {
-            stream.Write(package.Data, 0, package.Data.Length);
+            stream.Write(package.RawData, 0, package.RawData.Length);
             stream.Flush();
         }
-
-        public static byte[] GetBytes(this Encoding encoding, string str, int amount, byte defaultValue = default)
+        
+        public static async Task WriteAsync(this NetworkStream stream, IPackage package)
         {
-            byte[] result = new byte[amount];
-            byte[] temp = encoding.GetBytes(str);
-            
-            if (temp.Length > amount)
-            {
-                throw new ArgumentException();
-            }
-
-            for (int i = 0; i < temp.Length; i++)
-            {
-                result[i] = temp[i];
-            }
-
-            for (int i = temp.Length; i < amount; i++)
-            {
-                result[i] = defaultValue;
-            }
-
-            return result;
+            await stream.WriteAsync(package.RawData, 0, package.RawData.Length);
+            stream.Flush();
         }
     }
 }

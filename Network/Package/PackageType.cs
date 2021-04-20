@@ -1,4 +1,4 @@
-﻿namespace NetworkLibrary.Common.Package
+﻿namespace Network.Package
 {
     public enum PackageType
     {

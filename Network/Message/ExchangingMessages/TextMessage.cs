@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NetworkLibrary.Common.Message.ExchangingMessages
+namespace Network.Message.ExchangingMessages
 {
     public class TextMessage : IMessage
     {
