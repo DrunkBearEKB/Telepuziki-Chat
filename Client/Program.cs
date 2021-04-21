@@ -32,11 +32,11 @@ namespace Client
 
                 if (inputParsed.Length == 1)
                 {
-                    await client.SendMessage("", inputParsed[0]);
+                    await client.SendText("", inputParsed[0]);
                 }
                 else if (inputParsed.Length >= 2)
                 {
-                    await client.SendMessage(inputParsed[0], string.Join(" ", inputParsed.Skip(1)));
+                    await client.SendText(inputParsed[0], string.Join(" ", inputParsed.Skip(1)));
                 }
             }
             // ReSharper disable once FunctionNeverReturns

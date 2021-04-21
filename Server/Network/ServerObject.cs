@@ -22,11 +22,11 @@ namespace Server.Network
         private IHistory history;
 
         private Timer timerOnlineChecking;
-        private const int amountSecondsBetweenOnlineChecking = 5;
+        private const int AmountSecondsBetweenOnlineChecking = 5;
 
         public ServerObject()
         {
-            this.listener = new TcpListener(IPAddress.Any, this.port);
+            this.listener = new TcpListener(IPAddress.Any, port);
             this.dictionaryConnectedClients = new Dictionary<string, ConnectedClient>();
             this.packageCreator = new PackageCreator();
         }
@@ -37,18 +37,23 @@ namespace Server.Network
             
             this.listener.Start();
 
-            this.timerOnlineChecking = new Timer(amountSecondsBetweenOnlineChecking * 1000)
-            {
-                AutoReset = true, 
-                Enabled = true
-            };
-            this.timerOnlineChecking.Elapsed += this.OnTimerOnlineCheckingTick;
+            this.StartTimers();
 
             this.OnServerStarted?.Invoke();
 
             await this.StartListening();
         }
 
+        private void StartTimers()
+        {
+            this.timerOnlineChecking = new Timer(ServerObject.AmountSecondsBetweenOnlineChecking * 1000)
+            {
+                AutoReset = true, 
+                Enabled = true
+            };
+            this.timerOnlineChecking.Elapsed += this.OnTimerOnlineCheckingTick;
+        }
+        
         private async Task StartListening()
         {
             while (true)
@@ -81,18 +86,19 @@ namespace Server.Network
             
             while (!this.packageCreator.CanGetPackage)
             {
-                var amountBytesRead = client.GetStream().Read(bytes, 0, bytes.Length);
+                int amountBytesRead = client.GetStream().Read(bytes, 0, bytes.Length);
                 if (amountBytesRead != 0)
                 {
                     packageCreator.Add(bytes, amountBytesRead);
                 }
             }
+            
             return packageCreator.GetPackage();
         }
 
         private async Task HandleNotConnectedClient(IPackage package, TcpClient client)
         {
-            ConnectedClient connectedClient = new ConnectedClient(package.IdAuthor, client);
+            ConnectedClient connectedClient = new ConnectedClient(package.IdAuthor, client.GetStream());
             connectedClient.OnGetPackage += packageReceived =>
                 this.OnGetData?.Invoke(
                     $"[Received] " +

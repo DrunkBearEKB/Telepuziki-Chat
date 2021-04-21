@@ -9,22 +9,25 @@ namespace Server.Network
 {
     public class ConnectedClient
     {
-        public string Id { get; }
-        public bool Online;
+        public string Id { get; private set; }
+        public bool Online { get; private set; }
         
         private TcpClient client;
         private NetworkStream stream;
 
         private PackageCreator packageCreator;
 
-        public ConnectedClient(string id, TcpClient client)
+        public ConnectedClient(NetworkStream stream)
         {
-            this.Id = id;
             this.Online = true;
-            this.client = client;
-            this.stream = client.GetStream();
+            this.stream = stream;
             
             this.packageCreator = new PackageCreator();
+        }
+        
+        public ConnectedClient(string id, NetworkStream stream) : this(stream)
+        {
+            this.Id = id;
         }
         
 
@@ -35,13 +38,14 @@ namespace Server.Network
                 try
                 {
                     await this.ReceivePackage();
-                    await this.HandlePackage();
+                    this.HandleReceivedPackage();
                 }
                 catch
                 {
                     // TODO Логика работы,в ситуации, когда происходит ошибка при попытке получения данных от клиента
                 }
             }
+            // ReSharper disable once FunctionNeverReturns
         }
 
         private async Task ReceivePackage()
@@ -50,14 +54,14 @@ namespace Server.Network
             
             while (!this.packageCreator.CanGetPackage)
             {
-                var amount = await this.stream.ReadAsync(bytesBuffer);
-                packageCreator.Add(bytesBuffer, amount);
+                int amount = await this.stream.ReadAsync(bytesBuffer);
+                this.packageCreator.Add(bytesBuffer, amount);
             }
         }
 
-        private async Task HandlePackage()
+        private void HandleReceivedPackage()
         {
-            IPackage package = packageCreator.GetPackage();
+            IPackage package = this.packageCreator.GetPackage();
             this.OnGetPackage?.Invoke(package);
         }
 

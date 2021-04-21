@@ -13,13 +13,14 @@ namespace Client.Network
 {
     public class ClientObject
     {
-        private TcpClient tcpClient;
-        private readonly string ipServer = "192.168.88.71";  // 169.254.222.91  192.168.88.71
+        private readonly TcpClient tcpClient;
+        private readonly string ipServer = "192.168.88.71";  // 192.168.88.71  169.254.222.91
+        private readonly int portServer = 9090;
         private NetworkStream stream;
         
         private readonly PackageCreator packageCreator;
 
-        public readonly string Id;
+        public string Id { get; private set; }
 
         public ClientObject(string id)
         {
@@ -30,19 +31,35 @@ namespace Client.Network
         
         public async Task Start()
         {
-            await this.tcpClient.ConnectAsync(this.ipServer, 9090);
-            this.stream = this.tcpClient.GetStream();
-            await this.SendOnlineToServer();
-            
+            await this.ConnectToServer();
             await this.StartReceivingPackages();
         }
-        
-        public async Task SendMessage(string idReceiver, string data)
+
+        public async Task SendText(string idReceiver, string data)
         {
             IPackage package = new TextPackage(idReceiver, this.Id, DateTime.Now, data);
             await this.stream.WriteAsync(package);
         }
+        
+        public async Task SendFile(string idReceiver, byte[] data)
+        {
+            IPackage package = new FilePackage(idReceiver, this.Id, DateTime.Now, data);
+            await this.stream.WriteAsync(package);
+        }
+        
+        public async Task SendVoice(string idReceiver, byte[] data)
+        {
+            IPackage package = new VoicePackage(idReceiver, this.Id, DateTime.Now, data);
+            await this.stream.WriteAsync(package);
+        }
 
+        private async Task ConnectToServer()
+        {
+            await this.tcpClient.ConnectAsync(this.ipServer, this.portServer);
+            this.stream = this.tcpClient.GetStream();
+            await this.SendOnlineToServer();
+        }
+        
         private async Task SendOnlineToServer()
         {
             IPackage package = new OnlinePackage("", this.Id);
@@ -64,10 +81,21 @@ namespace Client.Network
             while (!this.packageCreator.CanGetPackage)
             {
                 byte[] bytes = new byte[1024];
-                int amountBytesRead = await this.stream.ReadAsync(bytes, 0, bytes.Length);
-                if (amountBytesRead != 0)
+
+                try
                 {
-                    this.packageCreator.Add(bytes, amountBytesRead);
+                    int amountBytesRead = await this.stream.ReadAsync(bytes, 0, bytes.Length);
+                    if (amountBytesRead != 0)
+                    {
+                        this.packageCreator.Add(bytes, amountBytesRead);
+                    }
+                }
+                catch (SocketException)
+                {
+                    await this.ConnectToServer();
+                    this.OnDisconnectFromServer?.Invoke();
+
+                    // TODO Логика работы в ситуации когда произошло отключение от сервера 
                 }
             }
         }
@@ -92,16 +120,22 @@ namespace Client.Network
                     break;
                         
                 case OnlinePackage:
+                    this.OnOnlinePackageReceive?.Invoke();
                     await this.SendOnlineToServer();
                     break;
                         
                 case DisconnectPackage:
-                    await this.tcpClient.ConnectAsync(this.ipServer, 9090);
-                    this.stream = this.tcpClient.GetStream();
-                    await this.SendOnlineToServer();
-                            
-                    // TODO Логика работы в ситуации когда произошло отключение от сервера
-                            
+                    this.OnDisconnectPackage?.Invoke();
+                    await this.ConnectToServer();
+                    // TODO Логика работы в ситуации когда произошло отключение от сервера (принудительное)
+                    break;
+                
+                case HistoryRequestPackage historyRequestPackage:
+                    // TODO Логика работы в ситуации когда пришёл запрос от сервера на получение истории сообщений
+                    break;
+                
+                case HistoryAnswerPackage historyAnswerPackage:
+                    // TODO Логика работы в ситуации когда пришёл ответ от сервера на получение истории сообщений
                     break;
             }
         }
@@ -115,7 +149,19 @@ namespace Client.Network
         public delegate void FilePackageReceiveHandler(FileMessage message);
         public event FilePackageReceiveHandler OnFileMessageReceive;
         
-        public delegate void HistoryReceiveHandler(IEnumerable<IMessage> listMessages);
-        public event HistoryReceiveHandler OnHistoryMessageReceive;
+        public delegate void OnlinePackageHandler();
+        public event OnlinePackageHandler OnOnlinePackageReceive;
+        
+        public delegate void DisconnectPackageHandler();
+        public event DisconnectPackageHandler OnDisconnectPackage;
+        
+        public delegate void HistoryRequestPackageHandler(IEnumerable<IMessage> listMessages);
+        public event HistoryRequestPackageHandler OnHistoryRequestPackageReceive;
+        
+        public delegate void HistoryAnswerPackageHandler(IEnumerable<IMessage> listMessages);
+        public event HistoryAnswerPackageHandler OnHistoryAnswerPackageReceive;
+        
+        public delegate void DisconnectFromServerHandler();
+        public event DisconnectFromServerHandler OnDisconnectFromServer;
     }
 }
