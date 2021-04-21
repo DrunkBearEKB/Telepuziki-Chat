@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using Network.Extensions;
 
 namespace Network.Package.ExchangingPackages
@@ -14,6 +14,20 @@ namespace Network.Package.ExchangingPackages
         public byte[] Content { get; }
         public byte[] RawData { get; }
 
+        public FilePackage(string idReceiver, string idAuthor, DateTime time, byte[] content)
+        {
+            this.IdReceiver = idReceiver;
+            this.IdAuthor = idAuthor;
+            this.Time = time;
+            this.Content = content;
+            
+            this.RawData = PackageCreator.GetRawFormattedData(
+                    this.Type,
+                    new []{ this.IdReceiver, this.IdAuthor, this.Time.ToFileTimeUtc().ToString() },
+                    this.Content)
+                .ToArray();
+        }
+        
         public FilePackage(byte[] bytes)
         {
             List<byte[]> listParsed = PackageCreator.Parse(bytes);
