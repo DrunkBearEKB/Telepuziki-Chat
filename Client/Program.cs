@@ -23,31 +23,32 @@ namespace Client
             //Application.SetCompatibleTextRenderingDefault(false);
             //Application.Run(new Form1());
 
+            Console.Write("Enter your name: ");
             ClientObject client = new ClientObject(Console.ReadLine());
 
-            client.OnTextMessageReceive += message => Console.WriteLine($">>> [{message.IdAuthor} {message.Content}]");
-            //client.OnOnlineChecking += () => Console.WriteLine($">>> Online checked!");
-            client.OnDisconnectFromServerForced += () => Console.WriteLine($">>> Disconnected!");
+            client.OnTextMessageReceive += message => 
+                Console.WriteLine($">>> [{message.IdAuthor}] [{message.Content}] [{message.Time}]");
+            client.OnDisconnectFromServerForced += () => 
+                Console.WriteLine($">>> Disconnected!");
 
-            new Thread(new ThreadStart(() => Reading(client))).Start();
+            new Thread(() => Reading(client)).Start();
             await client.Start();
         }
 
-        static void Reading(ClientObject client)
+        static async void Reading(ClientObject client)
         {
             while (true)
             {
                 // ReSharper disable once PossibleNullReferenceException
-                Console.Write("<<< ");
                 string[] inputParsed = Console.ReadLine().Split();
 
                 if (inputParsed.Length == 1)
                 {
-                    client.SendText("", inputParsed[0]);
+                    await client.SendText("", inputParsed[0]);
                 }
                 else if (inputParsed.Length >= 2)
                 {
-                    client.SendText(inputParsed[0], string.Join(" ", inputParsed.Skip(1)));
+                    await client.SendText(inputParsed[0], string.Join(" ", inputParsed.Skip(1)));
                 }
             }
             // ReSharper disable once FunctionNeverReturns

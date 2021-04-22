@@ -98,7 +98,7 @@ namespace Server.Network
 
         private async Task HandleNotConnectedClient(IPackage package, TcpClient client)
         {
-            ConnectedClient connectedClient = new ConnectedClient(package.IdAuthor, client.GetStream());
+            ConnectedClient connectedClient = new ConnectedClient(package.IdAuthor, client.GetStream(), this);
             connectedClient.OnGetPackage += packageReceived =>
                 this.OnGetData?.Invoke(packageReceived);
             connectedClient.OnClientDisconnected += () =>
@@ -110,7 +110,7 @@ namespace Server.Network
             this.dictionaryConnectedClients.Add(connectedClient.Id, connectedClient);
             this.OnClientConnected?.Invoke(connectedClient.Id);
                         
-            await connectedClient.StartListen();
+            connectedClient.StartListen();
         }
 
         private async Task HandleAlreadyConnectedClient(IPackage package, TcpClient client)
@@ -129,6 +129,14 @@ namespace Server.Network
         private async Task LoadMessageHistory()
         {
             // TODO Логика работы при загрузке истории
+        }
+
+        public async Task SendPackage(IPackage package)
+        {
+            if (this.dictionaryConnectedClients.ContainsKey(package.IdReceiver))
+            {
+                await this.dictionaryConnectedClients[package.IdReceiver].SendPackage(package);
+            }
         }
         
         public delegate void ServerStartedHandler();

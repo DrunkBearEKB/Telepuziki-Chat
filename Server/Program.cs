@@ -20,19 +20,22 @@ namespace Server
             server.OnClientDisconnected += idClient => Console.WriteLine($">>> {idClient} - disconnected;");
             server.OnGetData += package =>
             {
-                StringBuilder builder = new StringBuilder();
-                builder.Append($"[PackageType={package.Type}] " +
-                               $"[IdAuthor={package.IdAuthor}] " +
-                               $"[IdReceiver={package.IdReceiver}]");
-
-                if (package.Type == PackageType.Text)
+                if (package.Type != PackageType.Online)
                 {
-                    builder.Append(
-                        $" [Text={(package as TextPackage)?.Content}] " +
-                        $"[Time={(package as TextPackage)?.Time}]");
-                }
+                    StringBuilder builder = new StringBuilder();
+                    builder.Append($"[PackageType={package.Type}] " +
+                                   $"[IdAuthor={package.IdAuthor}] " +
+                                   $"[IdReceiver={package.IdReceiver}]");
+
+                    if (package.Type == PackageType.Text)
+                    {
+                        builder.Append(
+                            $" [Text={(package as TextPackage)?.Content}] " +
+                            $"[Time={(package as TextPackage)?.Time}]");
+                    }
                 
-                Console.WriteLine($">>> {builder.ToString()}");
+                    Console.WriteLine($">>> {builder.ToString()}");
+                }
             };
 
             await server.Start();
