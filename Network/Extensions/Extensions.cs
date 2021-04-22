@@ -38,7 +38,7 @@ namespace Network.Extensions
         public static async Task WriteAsync(this NetworkStream stream, IPackage package)
         {
             await stream.WriteAsync(package.RawData, 0, package.RawData.Length);
-            stream.Flush();
+            await stream.FlushAsync();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 
 using Network.Extensions;
@@ -54,8 +55,15 @@ namespace Server.Network
             
             while (!this.packageCreator.CanGetPackage)
             {
-                int amount = await this.stream.ReadAsync(bytesBuffer);
-                this.packageCreator.Add(bytesBuffer, amount);
+                try
+                {
+                    int amount = await this.stream.ReadAsync(bytesBuffer);
+                    this.packageCreator.Add(bytesBuffer, amount);
+                }
+                catch (SocketException)
+                {
+                    // TODO Логика работы в ситуации когда произошла ошибка связи с клиентом
+                }
             }
         }
 
@@ -63,18 +71,20 @@ namespace Server.Network
         {
             IPackage package = this.packageCreator.GetPackage();
             this.OnGetPackage?.Invoke(package);
+            this.Online = true;
         }
 
         public async Task CheckOnline()
         {
             if (!this.Online)
             {
-                await this.stream.WriteAsync(new DisconnectPackage(""));
+                await this.stream.WriteAsync(new DisconnectPackage(this.Id, ""));
                 this.OnClientDisconnected?.Invoke();
             }
             else
             {
                 await this.stream.WriteAsync(new OnlinePackage(this.Id, ""));
+                this.Online = false;
             }
         }
         

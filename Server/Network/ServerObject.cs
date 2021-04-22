@@ -100,13 +100,12 @@ namespace Server.Network
         {
             ConnectedClient connectedClient = new ConnectedClient(package.IdAuthor, client.GetStream());
             connectedClient.OnGetPackage += packageReceived =>
-                this.OnGetData?.Invoke(
-                    $"[Received] " +
-                    $"[Type={packageReceived.Type}] " +
-                    $"[IdAuthor={packageReceived.IdAuthor}] " +
-                    $"[IdReceiver={packageReceived.IdReceiver}]");
-            connectedClient.OnClientDisconnected += () => 
+                this.OnGetData?.Invoke(packageReceived);
+            connectedClient.OnClientDisconnected += () =>
+            {
                 this.OnClientDisconnected?.Invoke(connectedClient.Id);
+                this.dictionaryConnectedClients.Remove(connectedClient.Id);
+            };
                     
             this.dictionaryConnectedClients.Add(connectedClient.Id, connectedClient);
             this.OnClientConnected?.Invoke(connectedClient.Id);
@@ -141,7 +140,7 @@ namespace Server.Network
         public delegate void ClientDisconnectedHandler(string id);
         public event ClientDisconnectedHandler OnClientDisconnected;
         
-        public delegate void GetPackageHandler(string data);
+        public delegate void GetPackageHandler(IPackage package);
         public event GetPackageHandler OnGetData;
     }
 }

@@ -12,9 +12,9 @@ namespace Network.Package.ExchangingPackages
         public string IdAuthor { get; }
         public byte[] RawData { get; }
 
-        public DisconnectPackage(string idAuthor)
+        public DisconnectPackage(string idReceiver, string idAuthor)
         {
-            this.IdReceiver = "";
+            this.IdReceiver = idReceiver;
             this.IdAuthor = idAuthor;
 
             this.RawData = PackageCreator.GetRawFormattedData(

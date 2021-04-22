@@ -24,7 +24,12 @@ namespace Network.Package.ExchangingPackages
 
             this.RawData = PackageCreator.GetRawFormattedData(
                     this.Type,
-                    new []{ this.IdReceiver, this.IdAuthor, this.Time.ToFileTimeUtc().ToString() },
+                    new []
+                    {
+                        this.IdReceiver, 
+                        this.IdAuthor, 
+                        PackageCreator.GetFormattedTime(this.Time)
+                    },
                     this.Content)
                 .ToArray();
         }
@@ -35,7 +40,7 @@ namespace Network.Package.ExchangingPackages
             
             this.IdReceiver = PackageCreator.Encoding.GetString(listParsed[0]);
             this.IdAuthor = PackageCreator.Encoding.GetString(listParsed[1]);
-            this.Time = DateTime.Parse(PackageCreator.Encoding.GetString(listParsed[2]));
+            this.Time = PackageCreator.ParseTime(listParsed[2]);
             this.Content = listParsed[3];
             
             this.RawData = bytes;

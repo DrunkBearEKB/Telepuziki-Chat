@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
@@ -14,7 +15,7 @@ namespace Client.Network
     public class ClientObject
     {
         private readonly TcpClient tcpClient;
-        private readonly string ipServer = "192.168.88.71";  // 192.168.88.71  169.254.222.91
+        private readonly string ipServer = "127.0.0.1";  // 192.168.88.71  127.0.0.1
         private readonly int portServer = 9090;
         private NetworkStream stream;
         
@@ -92,17 +93,20 @@ namespace Client.Network
                 }
                 catch (SocketException)
                 {
-                    await this.ConnectToServer();
-                    this.OnDisconnectFromServer?.Invoke();
-
-                    // TODO Логика работы в ситуации когда произошло отключение от сервера 
+                    // TODO Логика работы в ситуации когда произошло исключение SocketException
+                }
+                catch (IOException)
+                {
+                    // TODO Логика работы в ситуации когда произошло исключение IOException
                 }
             }
         }
 
         private async Task HandlePackage()
         {
-            switch (this.packageCreator.GetPackage())
+            IPackage package = this.packageCreator.GetPackage();
+
+            switch (package)
             {
                 case TextPackage textPackage:
                     this.OnTextMessageReceive?.Invoke(
@@ -120,14 +124,13 @@ namespace Client.Network
                     break;
                         
                 case OnlinePackage:
-                    this.OnOnlinePackageReceive?.Invoke();
+                    this.OnOnlineChecking?.Invoke();
                     await this.SendOnlineToServer();
                     break;
                         
                 case DisconnectPackage:
-                    this.OnDisconnectPackage?.Invoke();
+                    this.OnDisconnectFromServerForced?.Invoke();
                     await this.ConnectToServer();
-                    // TODO Логика работы в ситуации когда произошло отключение от сервера (принудительное)
                     break;
                 
                 case HistoryRequestPackage historyRequestPackage:
@@ -140,28 +143,25 @@ namespace Client.Network
             }
         }
 
-        public delegate void TextPackageReceiveHandler(TextMessage message);
-        public event TextPackageReceiveHandler OnTextMessageReceive;
+        public delegate void TextMessageHandler(TextMessage message);
+        public event TextMessageHandler OnTextMessageReceive;
         
-        public delegate void VoicePackageReceiveHandler(VoiceMessage message);
-        public event VoicePackageReceiveHandler OnVoiceMessageReceive;
+        public delegate void VoiceMessageHandler(VoiceMessage message);
+        public event VoiceMessageHandler OnVoiceMessageReceive;
         
-        public delegate void FilePackageReceiveHandler(FileMessage message);
-        public event FilePackageReceiveHandler OnFileMessageReceive;
+        public delegate void FileMessageHandler(FileMessage message);
+        public event FileMessageHandler OnFileMessageReceive;
         
-        public delegate void OnlinePackageHandler();
-        public event OnlinePackageHandler OnOnlinePackageReceive;
+        public delegate void OnlineCheckingHandler();
+        public event OnlineCheckingHandler OnOnlineChecking;
         
-        public delegate void DisconnectPackageHandler();
-        public event DisconnectPackageHandler OnDisconnectPackage;
+        public delegate void HistoryRequestHandler();
+        public event HistoryRequestHandler OnHistoryRequest;
         
-        public delegate void HistoryRequestPackageHandler(IEnumerable<IMessage> listMessages);
-        public event HistoryRequestPackageHandler OnHistoryRequestPackageReceive;
+        public delegate void HistoryAnswerHandler(IEnumerable<IMessage> listMessages);
+        public event HistoryAnswerHandler OnHistoryReceive;
         
-        public delegate void HistoryAnswerPackageHandler(IEnumerable<IMessage> listMessages);
-        public event HistoryAnswerPackageHandler OnHistoryAnswerPackageReceive;
-        
-        public delegate void DisconnectFromServerHandler();
-        public event DisconnectFromServerHandler OnDisconnectFromServer;
+        public delegate void DisconnectFromServerForcedHandler();
+        public event DisconnectFromServerForcedHandler OnDisconnectFromServerForced;
     }
 }

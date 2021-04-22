@@ -52,7 +52,7 @@ namespace Network.Package
                 if (package != null)
                 {
                     this.queuePackagesReady.Enqueue(package);
-                    this.amountBytesBufferFullness -= amountBytes;
+                    this.amountBytesBufferFullness -= amountBytes + 4;
                 }
             }
         }
@@ -110,6 +110,16 @@ namespace Network.Package
             }
 
             return result;
+        }
+
+        public static string GetFormattedTime(DateTime dateTime)
+        {
+            return dateTime.ToFileTimeUtc().ToString();
+        }
+        
+        public static DateTime ParseTime(byte[] bytes)
+        {
+            return DateTime.FromFileTimeUtc(Convert.ToInt64(PackageCreator.Encoding.GetString(bytes)));
         }
     }
 }

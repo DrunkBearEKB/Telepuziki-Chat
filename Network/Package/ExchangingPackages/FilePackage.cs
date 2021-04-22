@@ -23,7 +23,12 @@ namespace Network.Package.ExchangingPackages
             
             this.RawData = PackageCreator.GetRawFormattedData(
                     this.Type,
-                    new []{ this.IdReceiver, this.IdAuthor, this.Time.ToFileTimeUtc().ToString() },
+                    new []
+                    {
+                        this.IdReceiver, 
+                        this.IdAuthor, 
+                        PackageCreator.GetFormattedTime(this.Time)
+                    },
                     this.Content)
                 .ToArray();
         }
