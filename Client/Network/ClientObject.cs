@@ -38,27 +38,48 @@ namespace Client.Network
 
         public async Task SendText(string idReceiver, string data)
         {
-            IPackage package = new TextPackage(idReceiver, this.Id, DateTime.Now, data);
-            await this.stream.WriteAsync(package);
+            await this.SendPackage(new TextPackage(idReceiver, this.Id, DateTime.Now, data));
         }
         
         public async Task SendFile(string idReceiver, byte[] data)
         {
-            IPackage package = new FilePackage(idReceiver, this.Id, DateTime.Now, data);
-            await this.stream.WriteAsync(package);
+            await this.SendPackage(new FilePackage(idReceiver, this.Id, DateTime.Now, data));
         }
         
         public async Task SendVoice(string idReceiver, byte[] data)
         {
-            IPackage package = new VoicePackage(idReceiver, this.Id, DateTime.Now, data);
-            await this.stream.WriteAsync(package);
+            await this.SendPackage(new VoicePackage(idReceiver, this.Id, DateTime.Now, data));
+
+        }
+
+        private async Task SendPackage(IPackage package)
+        {
+            try
+            {
+                await this.stream.WriteAsync(package);
+            }
+            catch (IOException)
+            {
+                this.OnDisconnectFromServer?.Invoke();
+                await this.ConnectToServer();
+            }
         }
 
         private async Task ConnectToServer()
         {
-            await this.tcpClient.ConnectAsync(this.ipServer, this.portServer);
-            this.stream = this.tcpClient.GetStream();
-            await this.SendOnlineToServer();
+            while (true)
+            {
+                try
+                {
+                    await this.tcpClient.ConnectAsync(this.ipServer, this.portServer);
+                    this.stream = this.tcpClient.GetStream();
+                    await this.SendOnlineToServer();
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
         }
         
         private async Task SendOnlineToServer()
@@ -72,7 +93,7 @@ namespace Client.Network
             while (true)
             {
                 await this.ReceivePackage();
-                await this.HandlePackage();
+                await this.HandleReceivedPackage();
             }
             // ReSharper disable once FunctionNeverReturns
         }
@@ -91,18 +112,16 @@ namespace Client.Network
                         this.packageCreator.Add(bytes, amountBytesRead);
                     }
                 }
-                catch (SocketException)
+                catch
                 {
-                    // TODO Логика работы в ситуации когда произошло исключение SocketException
-                }
-                catch (IOException)
-                {
-                    // TODO Логика работы в ситуации когда произошло исключение IOException
+                    this.OnDisconnectFromServer?.Invoke();
+                    await this.ConnectToServer();
+                    // TODO Логика работы в ситуации когда произошло исключение при попытке чтения из потока
                 }
             }
         }
 
-        private async Task HandlePackage()
+        private async Task HandleReceivedPackage()
         {
             IPackage package = this.packageCreator.GetPackage();
 
@@ -129,7 +148,7 @@ namespace Client.Network
                     break;
                         
                 case DisconnectPackage:
-                    this.OnDisconnectFromServerForced?.Invoke();
+                    this.OnDisconnectFromServer?.Invoke();
                     await this.ConnectToServer();
                     break;
                 
@@ -141,6 +160,11 @@ namespace Client.Network
                     // TODO Логика работы в ситуации когда пришёл ответ от сервера на получение истории сообщений
                     break;
             }
+        }
+
+        public async Task Disconnect()
+        {
+            await this.SendPackage(new DisconnectPackage("", this.Id));
         }
 
         public delegate void TextMessageHandler(TextMessage message);
@@ -162,6 +186,6 @@ namespace Client.Network
         public event HistoryAnswerHandler OnHistoryReceive;
         
         public delegate void DisconnectFromServerForcedHandler();
-        public event DisconnectFromServerForcedHandler OnDisconnectFromServerForced;
+        public event DisconnectFromServerForcedHandler OnDisconnectFromServer;
     }
 }

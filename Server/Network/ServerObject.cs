@@ -19,7 +19,7 @@ namespace Server.Network
         private readonly int port = 9090;
         private readonly PackageCreator packageCreator;
 
-        private IHistory history;
+        private IHistory messageHistory;
 
         private Timer timerOnlineChecking;
         private const int AmountSecondsBetweenOnlineChecking = 5;
@@ -34,14 +34,12 @@ namespace Server.Network
         public async Task Start()
         {
             await this.LoadMessageHistory();
-            
-            this.listener.Start();
-
             this.StartTimers();
 
-            this.OnServerStarted?.Invoke();
-
+            this.listener.Start();
             await this.StartListening();
+            
+            this.OnServerStarted?.Invoke();
         }
 
         private void StartTimers()
@@ -61,7 +59,8 @@ namespace Server.Network
                 try
                 {
                     TcpClient client = await this.listener.AcceptTcpClientAsync();
-                    IPackage package = this.ReceivePackageAfterConnection(client);
+                    await this.ReceivePackageAfterConnection(client);
+                    IPackage package = this.packageCreator.GetPackage();
 
                     if (!this.dictionaryConnectedClients.ContainsKey(package.IdAuthor))
                     {
@@ -80,20 +79,22 @@ namespace Server.Network
             // ReSharper disable once FunctionNeverReturns
         }
 
-        private IPackage ReceivePackageAfterConnection(TcpClient client)
+        private async Task ReceivePackageAfterConnection(TcpClient client)
         {
             byte[] bytes = new byte[1024];
             
             while (!this.packageCreator.CanGetPackage)
             {
-                int amountBytesRead = client.GetStream().Read(bytes, 0, bytes.Length);
-                if (amountBytesRead != 0)
+                try
                 {
+                    int amountBytesRead = await client.GetStream().ReadAsync(bytes, 0, bytes.Length);
                     packageCreator.Add(bytes, amountBytesRead);
                 }
+                catch (SocketException)
+                {
+                    // TODO Логика работы в ситуации когда произошла ошибка связи с клиентом
+                }
             }
-            
-            return packageCreator.GetPackage();
         }
 
         private async Task HandleNotConnectedClient(IPackage package, TcpClient client)
@@ -136,6 +137,10 @@ namespace Server.Network
             if (this.dictionaryConnectedClients.ContainsKey(package.IdReceiver))
             {
                 await this.dictionaryConnectedClients[package.IdReceiver].SendPackage(package);
+            }
+            else
+            {
+                // TODO Логика работы при попытке отправить данные неподключенному клиенту
             }
         }
         

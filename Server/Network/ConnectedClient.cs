@@ -31,6 +31,11 @@ namespace Server.Network
         {
             this.Id = id;
         }
+        
+        public async Task SendPackage(IPackage package)
+        {
+            await this.stream.WriteAsync(package);
+        }
 
         public async Task StartListen()
         {
@@ -101,11 +106,11 @@ namespace Server.Network
             }
         }
 
-        public async Task SendPackage(IPackage package)
+        public async Task Disconnect()
         {
-            await this.stream.WriteAsync(package);
+            this.OnClientDisconnected?.Invoke();
         }
-        
+            
         public delegate void GetPackageHandler(IPackage package);
         public event GetPackageHandler OnGetPackage;
         
