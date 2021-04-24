@@ -13,6 +13,13 @@ namespace Client
 {
     static class Program
     {
+        private static Thread threadReadFromConsole;
+
+        private static ConsoleColor colorInput = ConsoleColor.White;
+        private static ConsoleColor colorReceiveMessage = ConsoleColor.Green;
+        private static ConsoleColor colorWarning = ConsoleColor.Yellow;
+        private static ConsoleColor colorException = ConsoleColor.Red;
+
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>
@@ -29,18 +36,20 @@ namespace Client
 
             client.OnTextMessageReceive += message =>
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($">>> [{message.IdAuthor}] [{message.Content}] [{message.Time}]");
-                Console.ForegroundColor = ConsoleColor.White;
+                Console.ForegroundColor = colorReceiveMessage;
+                Console.WriteLine($">>> from: {message.IdAuthor} \"{message.Content}\" [{message.Time}]");
+                Console.ForegroundColor = colorInput;
             };
             client.OnDisconnectFromServer += () =>
             {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($">>> Disconnected!");
-                Console.ForegroundColor = ConsoleColor.White;
+                Console.ForegroundColor = colorWarning;
+                Console.WriteLine(">>> Disconnected!");
+                Console.ForegroundColor = colorInput;
             };
+            
+            threadReadFromConsole = new Thread(() => ReadFromConsole(client));
+            threadReadFromConsole.Start();
 
-            new Thread(() => ReadFromConsole(client)).Start();
             await client.Start();
         }
 
@@ -48,31 +57,45 @@ namespace Client
         {
             while (true)
             {
-                // ReSharper disable once PossibleNullReferenceException
-                Console.ForegroundColor = ConsoleColor.White;
-                string line = Console.ReadLine().TrimStart().TrimEnd();
-                string[] inputParsed = line.Split();
+                Console.ForegroundColor = colorInput;
+                string line = Console.ReadLine();
+                Console.SetCursorPosition(0, Console.CursorTop - 1);
 
-                if (inputParsed.Length == 1)
+                line?.TrimStart().TrimEnd();
+                
+                if (line != null)
                 {
-                    if (inputParsed[0].ToLower() == "disconnect")
+                    string[] inputParsed = line.Split();
+
+                    if (inputParsed.Length == 1)
                     {
-                        await client.Disconnect();
+                        if (inputParsed[0].ToLower() == "connect")
+                        {
+                            Console.ForegroundColor = colorInput;
+                            Console.WriteLine($"<<< [COMMAND] {line}");
+                            Console.ForegroundColor = colorException;
+                            Console.WriteLine(">>> [EXCEPTION] Unable to reconnect, please restart the client.");
+                            return;
+                        }
+                        else if (inputParsed[0].ToLower() == "disconnect")
+                        {
+                            Console.WriteLine($"<<< [COMMAND] {line}");
+                            await client.Disconnect();
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = colorException;
+                            Console.WriteLine($">>> [EXCEPTION] Unhandled command: \"{inputParsed[0]}\"!");
+                        }
                     }
-                    else if (inputParsed[0].ToLower() == "reconnect")
+                    else if (inputParsed.Length >= 2)
                     {
-                        await client.Start();
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"[EXCEPTION] Unhandled command: \"{inputParsed[0]}\"!");
+                        string text = string.Join(" ", inputParsed.Skip(1));
+                        Console.WriteLine($"<<< to: {inputParsed[0]} \"{text}\" [{DateTime.Now}]");
+                        await client.SendText(inputParsed[0], text);
                     }
                 }
-                else if (inputParsed.Length >= 2)
-                {
-                    await client.SendText(inputParsed[0], string.Join(" ", inputParsed.Skip(1)));
-                }
+                Console.ForegroundColor = colorInput;
             }
             // ReSharper disable once FunctionNeverReturns
         }

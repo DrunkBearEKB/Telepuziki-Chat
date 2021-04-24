@@ -35,7 +35,6 @@ namespace Client.Network
         public async Task Start()
         {
             await this.ConnectToServer();
-            Console.WriteLine("123");
             await this.StartReceivingPackages();
         }
 
@@ -86,7 +85,6 @@ namespace Client.Network
                     // ignored
                 }
             }
-            Console.WriteLine("Connected!");
         }
         
         private async Task SendOnlineToServer()
@@ -97,8 +95,6 @@ namespace Client.Network
 
         private async Task StartReceivingPackages()
         {
-            Console.WriteLine("456");
-            
             while (true)
             {
                 await this.ReceivePackage();
@@ -129,9 +125,8 @@ namespace Client.Network
                         this.packageCreator.Add(bytes, amountBytesRead);
                     }
                 }
-                catch (Exception e)
+                catch
                 {
-                    Console.WriteLine(e);
                     break;
                 }
             }
