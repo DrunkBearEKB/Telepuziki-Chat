@@ -14,25 +14,28 @@ namespace Client.Network
 {
     public class ClientObject
     {
-        private readonly TcpClient tcpClient;
+        private TcpClient tcpClient;
         private readonly string ipServer = "127.0.0.1";  // 192.168.88.71  127.0.0.1
         private readonly int portServer = 9090;
         private NetworkStream stream;
         
         private readonly PackageCreator packageCreator;
 
+        public bool AutoReconnect = true;
+        private bool isConnected;
+
         public string Id { get; private set; }
 
         public ClientObject(string id)
         {
             this.Id = id;
-            this.tcpClient = new TcpClient();
             this.packageCreator = new PackageCreator();
         }
         
         public async Task Start()
         {
             await this.ConnectToServer();
+            Console.WriteLine("123");
             await this.StartReceivingPackages();
         }
 
@@ -60,8 +63,7 @@ namespace Client.Network
             }
             catch (IOException)
             {
-                this.OnDisconnectFromServer?.Invoke();
-                await this.ConnectToServer();
+                await this.HandleDisconnect();
             }
         }
 
@@ -71,15 +73,20 @@ namespace Client.Network
             {
                 try
                 {
+                    this.tcpClient = new TcpClient();
                     await this.tcpClient.ConnectAsync(this.ipServer, this.portServer);
+                    
                     this.stream = this.tcpClient.GetStream();
                     await this.SendOnlineToServer();
+                    this.isConnected = true;
+                    break;
                 }
                 catch
                 {
                     // ignored
                 }
             }
+            Console.WriteLine("Connected!");
         }
         
         private async Task SendOnlineToServer()
@@ -90,12 +97,22 @@ namespace Client.Network
 
         private async Task StartReceivingPackages()
         {
+            Console.WriteLine("456");
+            
             while (true)
             {
                 await this.ReceivePackage();
-                await this.HandleReceivedPackage();
+                if (this.isConnected)
+                {
+                    await this.HandleReceivedPackage();
+                }
+                else
+                {
+                    break;
+                }
             }
-            // ReSharper disable once FunctionNeverReturns
+            
+            await this.HandleDisconnect();
         }
 
         private async Task ReceivePackage()
@@ -112,12 +129,16 @@ namespace Client.Network
                         this.packageCreator.Add(bytes, amountBytesRead);
                     }
                 }
-                catch
+                catch (Exception e)
                 {
-                    this.OnDisconnectFromServer?.Invoke();
-                    await this.ConnectToServer();
-                    // TODO Логика работы в ситуации когда произошло исключение при попытке чтения из потока
+                    Console.WriteLine(e);
+                    break;
                 }
+            }
+
+            if (!this.packageCreator.CanGetPackage)
+            {
+                await this.HandleDisconnect();
             }
         }
 
@@ -148,8 +169,7 @@ namespace Client.Network
                     break;
                         
                 case DisconnectPackage:
-                    this.OnDisconnectFromServer?.Invoke();
-                    await this.ConnectToServer();
+                    await this.HandleDisconnect();
                     break;
                 
                 case HistoryRequestPackage historyRequestPackage:
@@ -165,6 +185,19 @@ namespace Client.Network
         public async Task Disconnect()
         {
             await this.SendPackage(new DisconnectPackage("", this.Id));
+        }
+
+        private async Task HandleDisconnect()
+        {
+            if (this.isConnected)
+            {
+                this.isConnected = false;
+                this.OnDisconnectFromServer?.Invoke();
+                if (this.AutoReconnect)    
+                {   
+                    await this.ConnectToServer();
+                }
+            }
         }
 
         public delegate void TextMessageHandler(TextMessage message);

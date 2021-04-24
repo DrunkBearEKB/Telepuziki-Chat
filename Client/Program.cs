@@ -17,7 +17,6 @@ namespace Client
         ///  The main entry point for the application.
         /// </summary>
         //[STAThread]
-        [SuppressMessage("ReSharper.DPA", "DPA0002: Excessive memory allocations in SOH", MessageId = "type: System.String")]
         static async Task Main()
         {
             //Application.SetHighDpiMode(HighDpiMode.SystemAware);
@@ -26,12 +25,20 @@ namespace Client
             //Application.Run(new Form1());
 
             Console.Write("Enter your name: ");
-            ClientObject client = new ClientObject(Console.ReadLine());
+            ClientObject client = new ClientObject(Console.ReadLine()) { AutoReconnect = false};
 
-            client.OnTextMessageReceive += message => 
+            client.OnTextMessageReceive += message =>
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($">>> [{message.IdAuthor}] [{message.Content}] [{message.Time}]");
-            client.OnDisconnectFromServer += () => 
+                Console.ForegroundColor = ConsoleColor.White;
+            };
+            client.OnDisconnectFromServer += () =>
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine($">>> Disconnected!");
+                Console.ForegroundColor = ConsoleColor.White;
+            };
 
             new Thread(() => ReadFromConsole(client)).Start();
             await client.Start();
@@ -42,13 +49,24 @@ namespace Client
             while (true)
             {
                 // ReSharper disable once PossibleNullReferenceException
-                string[] inputParsed = Console.ReadLine().Split();
+                Console.ForegroundColor = ConsoleColor.White;
+                string line = Console.ReadLine().TrimStart().TrimEnd();
+                string[] inputParsed = line.Split();
 
                 if (inputParsed.Length == 1)
                 {
                     if (inputParsed[0].ToLower() == "disconnect")
                     {
                         await client.Disconnect();
+                    }
+                    else if (inputParsed[0].ToLower() == "reconnect")
+                    {
+                        await client.Start();
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"[EXCEPTION] Unhandled command: \"{inputParsed[0]}\"!");
                     }
                 }
                 else if (inputParsed.Length >= 2)

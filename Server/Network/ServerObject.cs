@@ -35,11 +35,9 @@ namespace Server.Network
         {
             await this.LoadMessageHistory();
             this.StartTimers();
-
             this.listener.Start();
+            this.OnStarted?.Invoke();
             await this.StartListening();
-            
-            this.OnServerStarted?.Invoke();
         }
 
         private void StartTimers()
@@ -102,10 +100,11 @@ namespace Server.Network
             ConnectedClient connectedClient = new ConnectedClient(package.IdAuthor, client.GetStream(), this);
             connectedClient.OnGetPackage += packageReceived =>
                 this.OnGetData?.Invoke(packageReceived);
-            connectedClient.OnClientDisconnected += () =>
+            connectedClient.OnDisconnected += () =>
             {
                 this.OnClientDisconnected?.Invoke(connectedClient.Id);
                 this.dictionaryConnectedClients.Remove(connectedClient.Id);
+                connectedClient.Dispose();
             };
                     
             this.dictionaryConnectedClients.Add(connectedClient.Id, connectedClient);
@@ -143,9 +142,21 @@ namespace Server.Network
                 // TODO Логика работы при попытке отправить данные неподключенному клиенту
             }
         }
+
+        public async Task Disconnect(string id)
+        {
+            if (this.dictionaryConnectedClients.ContainsKey(id))
+            {
+                this.dictionaryConnectedClients.Remove(id);
+            }
+            else
+            {
+                // TODO Логика работы при попытке отключить клиента, который не подключён
+            }
+        }
         
         public delegate void ServerStartedHandler();
-        public event ServerStartedHandler OnServerStarted;
+        public event ServerStartedHandler OnStarted;
         
         public delegate void ClientConnectedHandler(string id);
         public event ClientConnectedHandler OnClientConnected;
@@ -155,5 +166,13 @@ namespace Server.Network
         
         public delegate void GetPackageHandler(IPackage package);
         public event GetPackageHandler OnGetData;
+
+        ~ServerObject()
+        {
+            foreach (ConnectedClient client in this.dictionaryConnectedClients.Values)
+            {
+                client.Disconnect();
+            }
+        }
     }
 }

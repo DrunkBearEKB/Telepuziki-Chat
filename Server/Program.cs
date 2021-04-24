@@ -15,7 +15,7 @@ namespace Server
         {
             ServerObject server = new ServerObject();
             
-            server.OnServerStarted += () => Console.WriteLine(">>> Server started!");
+            server.OnStarted += () => Console.WriteLine(">>> Server started!");
             server.OnClientConnected += idClient => Console.WriteLine($">>> {idClient} - connected;");
             server.OnClientDisconnected += idClient => Console.WriteLine($">>> {idClient} - disconnected;");
             server.OnGetData += package =>

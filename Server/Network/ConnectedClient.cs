@@ -8,19 +8,19 @@ using Network.Package.ExchangingPackages;
 
 namespace Server.Network
 {
-    public class ConnectedClient
+    public class ConnectedClient : IDisposable
     {
         public string Id { get; private set; }
-        public bool Online { get; private set; }
+        private bool online;
         
-        private NetworkStream stream;
-        private ServerObject server;
+        private readonly NetworkStream stream;
+        private readonly ServerObject server;
 
         private PackageCreator packageCreator;
 
         public ConnectedClient(NetworkStream stream, ServerObject server)
         {
-            this.Online = true;
+            this.online = true;
             this.stream = stream;
             this.server = server;
             
@@ -43,18 +43,21 @@ namespace Server.Network
             {
                 try
                 {
-                    await this.ReceivePackage();
-                    this.HandleReceivedPackage();
+                    IPackage package = await this.ReceivePackage();
+                    await this.HandleReceivedPackage(package);
                 }
                 catch
                 {
+                    await this.server.Disconnect(this.Id);
+                    await this.Disconnect();
+                    
                     // TODO Логика работы,в ситуации, когда происходит ошибка при попытке получения данных от клиента
                 }
             }
             // ReSharper disable once FunctionNeverReturns
         }
 
-        private async Task ReceivePackage()
+        private async Task<IPackage> ReceivePackage()
         {
             byte[] bytesBuffer = new byte[1024];
             
@@ -70,34 +73,52 @@ namespace Server.Network
                     // TODO Логика работы в ситуации когда произошла ошибка связи с клиентом
                 }
             }
+
+            return this.packageCreator.GetPackage();
         }
 
-        private async Task HandleReceivedPackage()
+        private async Task HandleReceivedPackage(IPackage package)
         {
-            IPackage package = this.packageCreator.GetPackage();
-
+            this.online = true;
+            
             if (package.IdReceiver != "")
             {
                 await this.server.SendPackage(package);
+                this.OnGetPackage?.Invoke(package);
             }
-            
-            this.OnGetPackage?.Invoke(package);
-            this.Online = true;
+            else
+            {
+                switch (package)
+                {
+                    case DisconnectPackage:
+                        await this.server.Disconnect(this.Id);
+                        await this.Disconnect();
+                        break;
+                
+                    case HistoryRequestPackage historyRequestPackage:
+                        // TODO Логика работы в ситуации когда пришёл запрос от клиента на получение истории сообщений
+                        break;
+                
+                    case HistoryAnswerPackage historyAnswerPackage:
+                        // TODO Логика работы в ситуации когда пришёл ответ от клиента на получение истории сообщений
+                        break;
+                }
+            }
         }
 
         public async Task CheckOnline()
         {
             try
             {
-                if (!this.Online)
+                if (!this.online)
                 {
                     await this.stream.WriteAsync(new DisconnectPackage(this.Id, ""));
-                    this.OnClientDisconnected?.Invoke();
+                    this.OnDisconnected?.Invoke();
                 }
                 else
                 {
                     await this.stream.WriteAsync(new OnlinePackage(this.Id, ""));
-                    this.Online = false;
+                    this.online = false;
                 }
             }
             catch
@@ -108,13 +129,20 @@ namespace Server.Network
 
         public async Task Disconnect()
         {
-            this.OnClientDisconnected?.Invoke();
+            await this.SendPackage(new DisconnectPackage(this.Id, ""));
+            this.stream.Close();
+            this.OnDisconnected?.Invoke();
         }
             
         public delegate void GetPackageHandler(IPackage package);
         public event GetPackageHandler OnGetPackage;
         
         public delegate void ClientDisconnectedHandler();
-        public event ClientDisconnectedHandler OnClientDisconnected;
+        public event ClientDisconnectedHandler OnDisconnected;
+
+        public void Dispose()
+        {
+            stream?.Dispose();
+        }
     }
 }
