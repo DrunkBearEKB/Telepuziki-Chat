@@ -97,21 +97,20 @@ namespace Client.Network
         {
             while (true)
             {
-                await this.ReceivePackage();
-                if (this.isConnected)
+                IPackage package = await this.ReceivePackage();
+                
+                if (package != null)
                 {
-                    await this.HandleReceivedPackage();
+                    await this.HandleReceivedPackage(package);
                 }
                 else
                 {
-                    break;
+                    await this.HandleDisconnect();
                 }
             }
-            
-            await this.HandleDisconnect();
         }
 
-        private async Task ReceivePackage()
+        private async Task<IPackage> ReceivePackage()
         {
             while (!this.packageCreator.CanGetPackage)
             {
@@ -131,16 +130,11 @@ namespace Client.Network
                 }
             }
 
-            if (!this.packageCreator.CanGetPackage)
-            {
-                await this.HandleDisconnect();
-            }
+            return this.packageCreator.CanGetPackage ? this.packageCreator.GetPackage() : null;
         }
 
-        private async Task HandleReceivedPackage()
+        private async Task HandleReceivedPackage(IPackage package)
         {
-            IPackage package = this.packageCreator.GetPackage();
-
             switch (package)
             {
                 case TextPackage textPackage:

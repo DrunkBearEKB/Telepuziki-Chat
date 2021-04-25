@@ -10,10 +10,4 @@
       <ProjectReference Include="..\Network\Network.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Update="UserInteface\Form1.cs">
-        <SubType>Form</SubType>
-      </Compile>
-    </ItemGroup>
-
 </Project>
