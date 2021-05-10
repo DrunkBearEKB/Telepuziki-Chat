@@ -18,6 +18,7 @@ namespace Client.UserInteface
         private Thread threadReadFromConsole;
         
         private static ConsoleColor colorInput = ConsoleColor.White;
+        private static ConsoleColor colorSendMessage = ConsoleColor.Blue;
         private static ConsoleColor colorReceiveMessage = ConsoleColor.Green;
         private static ConsoleColor colorWarning = ConsoleColor.Yellow;
         private static ConsoleColor colorException = ConsoleColor.Red;
@@ -39,7 +40,7 @@ namespace Client.UserInteface
 
             this.clientObject.OnTextMessageReceive += message =>
             {
-                string text = $">>> from: {message.IdAuthor} \"{message.Content}\" [{message.Time}]";
+                string text = $">>> from \"{message.IdAuthor}\": {message.Content} [{message.Time}]";
                 
                 if (!Console.KeyAvailable)
                 {
@@ -102,17 +103,20 @@ namespace Client.UserInteface
 
                 if (inputParsed.Length == 1)
                 {
-                    if (inputParsed[0].ToLower() == "connect")
+                    if (inputParsed[0].Length != 0)
                     {
                         Console.ForegroundColor = colorInput;
                         Console.WriteLine($"<<< [COMMAND] {line}");
+                    }
+                    
+                    if (inputParsed[0].ToLower() == "connect")
+                    {
                         Console.ForegroundColor = colorException;
                         Console.WriteLine(">>> [EXCEPTION] Unable to reconnect, please restart the client.");
                         return;
                     }
                     else if (inputParsed[0].ToLower() == "disconnect")
                     {
-                        Console.WriteLine($"<<< [COMMAND] {line}");
                         await this.clientObject.Disconnect();
                     }
                     else
@@ -120,7 +124,7 @@ namespace Client.UserInteface
                         if (inputParsed[0].Length != 0)
                         {
                             Console.ForegroundColor = colorException;
-                            Console.WriteLine($">>> [EXCEPTION] Unhandled command: \"{inputParsed[0]}\"!");
+                            Console.WriteLine($">>> [EXCEPTION] Unknown command: \"{inputParsed[0]}\"!");
                         }
                         else if (listUnhandledActions.Count == 0)
                         {
@@ -131,7 +135,8 @@ namespace Client.UserInteface
                 else if (inputParsed.Length >= 2)
                 {
                     string text = string.Join(" ", inputParsed.Skip(1));
-                    Console.WriteLine($"<<< to: {inputParsed[0]} \"{text}\" [{DateTime.Now}]");
+                    Console.ForegroundColor = colorSendMessage;
+                    Console.WriteLine($"<<< to \"{inputParsed[0]}\": {text} [{DateTime.Now}]");
                     await this.clientObject.SendText(inputParsed[0], text);
                 }
                 
