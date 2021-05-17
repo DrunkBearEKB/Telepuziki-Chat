@@ -22,8 +22,7 @@ namespace Client.Network
         private readonly PackageCreator packageCreator;
 
         public bool AutoReconnect = true;
-        private bool isConnected;
-
+        public bool IsConnected { get; private set; }
         public string Id { get; private set; }
 
         public ClientObject(string id)
@@ -77,7 +76,7 @@ namespace Client.Network
                     
                     this.stream = this.tcpClient.GetStream();
                     await this.SendOnlineToServer();
-                    this.isConnected = true;
+                    this.IsConnected = true;
                     break;
                 }
                 catch
@@ -98,7 +97,7 @@ namespace Client.Network
             while (true)
             {
                 await this.ReceivePackage();
-                if (this.isConnected)
+                if (this.IsConnected)
                 {
                     await this.HandleReceivedPackage();
                 }
@@ -145,17 +144,17 @@ namespace Client.Network
             {
                 case TextPackage textPackage:
                     this.OnTextMessageReceive?.Invoke(
-                        new TextMessage(textPackage.IdAuthor, textPackage.Time, textPackage.Content));
+                        new TextMessage(this.Id, textPackage.IdAuthor, textPackage.Time, textPackage.Content));
                     break;
                         
                 case VoicePackage voicePackage:
                     this.OnVoiceMessageReceive?.Invoke(
-                        new VoiceMessage(voicePackage.IdAuthor, voicePackage.Time, voicePackage.Content));
+                        new VoiceMessage(this.Id, voicePackage.IdAuthor, voicePackage.Time, voicePackage.Content));
                     break;
                         
                 case FilePackage filePackage:
                     this.OnFileMessageReceive?.Invoke(
-                        new FileMessage(filePackage.IdAuthor, filePackage.Time, filePackage.Content));
+                        new FileMessage(this.Id, filePackage.IdAuthor, filePackage.Time, filePackage.Content));
                     break;
                         
                 case OnlinePackage:
@@ -184,9 +183,9 @@ namespace Client.Network
 
         private async Task HandleDisconnect()
         {
-            if (this.isConnected)
+            if (this.IsConnected)
             {
-                this.isConnected = false;
+                this.IsConnected = false;
                 this.OnDisconnectFromServer?.Invoke();
                 if (this.AutoReconnect)    
                 {   

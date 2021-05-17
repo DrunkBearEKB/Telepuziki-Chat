@@ -11,8 +11,21 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="UserInteface\Form1.cs">
-        <SubType>Form</SubType>
+      <PackageReference Include="System.Management" Version="6.0.0-preview.3.21201.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Resources.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Resources.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Resources.resx</DependentUpon>
       </Compile>
     </ItemGroup>
 
