@@ -311,7 +311,7 @@ namespace Client.UserInterface
                 ScrollBars = ScrollBars.Vertical,
                 AcceptsReturn = true,
                 Margin = new Padding(0),
-                Visible = false,
+                //Visible = false,
                 TabStop = false
             };
             panelTextBoxChat.Controls.Add(this.textBoxChat);
@@ -463,37 +463,34 @@ namespace Client.UserInterface
             }
 
             Thread.Sleep(100);
-            if (this.client.IsHistoryReceived)
+            this.panelContactsBox.CurrentContact.HistoryReceived = true;
+            this.textBoxChat.SuspendLayout();
+            while (true)
             {
-                this.panelContactsBox.CurrentContact.HistoryReceived = true;
-                this.textBoxChat.SuspendLayout();
-                while (true)
+                try
                 {
-                    try
+                    StringBuilder builder = new StringBuilder();
+                    foreach (IMessage m in this.dictMessageHistory[this.panelContactsBox.CurrentContact.Id])
                     {
-                        StringBuilder builder = new StringBuilder();
-                        foreach (IMessage m in this.dictMessageHistory[this.panelContactsBox.CurrentContact.Id])
+                        switch (m)
                         {
-                            switch (m)
-                            {
-                                case TextMessage textMessage:
-                                    builder.Append($"{textMessage.IdAuthor}: {textMessage.Content}     " +
-                                                   $"[{m.Time}]{Environment.NewLine}");
-                                    break;
-                                default:
-                                    break;
-                            }
+                            case TextMessage textMessage:
+                                builder.Append($"{textMessage.IdAuthor}: {textMessage.Content}     " +
+                                               $"[{m.Time}]{Environment.NewLine}");
+                                break;
+                            default:
+                                break;
                         }
-                        this.textBoxChat.AppendText(builder.ToString());
-                        break;
                     }
-                    catch
-                    {
-                        this.textBoxChat.Clear();
-                    }
+                    this.textBoxChat.AppendText(builder.ToString());
+                    break;
                 }
-                this.textBoxChat.ResumeLayout();
+                catch
+                {
+                    this.textBoxChat.Clear();
+                }
             }
+            this.textBoxChat.ResumeLayout();
             
             if (this.dictMessageNotFinished.ContainsKey(this.panelContactsBox.CurrentContact.Id))
             {
