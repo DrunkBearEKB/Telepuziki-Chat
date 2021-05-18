@@ -25,7 +25,7 @@ namespace Client.UserInterface.Controls
                 Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right,
 
                 Text = this.id,
-                Font = new Font(Resources.FontName, 16.8F, FontStyle.Bold, GraphicsUnit.Point, 204),
+                Font = new Font(Resources.FontName, 12.8F, FontStyle.Bold, GraphicsUnit.Point, 204),
                 TextAlign = ContentAlignment.MiddleCenter,
                 ForeColor = Color.White
             };

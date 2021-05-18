@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Network.Message;
 
-namespace Client.UserInterface
+namespace Client.Common
 {
     public class Contact
     {

@@ -2,23 +2,20 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using Client.Common;
 
 namespace Client.UserInterface.Controls
 {
-    class PanelContactsBox : Panel
+    public class PanelContactsBox : Panel
     {
         public List<Contact> Contacts { get; }
         private readonly Dictionary<string, PanelContact> dictionaryPanelContacts;
         private readonly List<PanelContact> listPanelContacts;
         private readonly IClientForm form;
 
-        private readonly int heightLabel = 60;
+        private readonly int heightLabel = 70;
 
         public Contact CurrentContact = null;
-
-        private readonly Color backColor = Color.FromArgb(23, 33, 43);
-        private readonly Color backColorEnter = Color.FromArgb(36, 47, 61);
-        private readonly Color backColorSelected = Color.FromArgb(43, 82, 120);
 
         public PanelContactsBox(List<Contact> listContacts, IClientForm form)
         {
@@ -40,7 +37,7 @@ namespace Client.UserInterface.Controls
                 Location = new Point(0, this.heightLabel * this.Contacts.Count),
                 Size = new Size(240, this.heightLabel),
 
-                BackColor = this.backColor
+                BackColor = ClientForm.BackColorPanelCenter
             };
             panelContact.Click += new EventHandler(
                 (sender, e) =>
@@ -53,16 +50,16 @@ namespace Client.UserInterface.Controls
                     {
                         idPrevious = this.CurrentContact.Id;
 
-                        this.listPanelContacts[this.Contacts.IndexOf(this.CurrentContact)].labelId.BackColor = this.backColor;
-                        this.listPanelContacts[this.Contacts.IndexOf(this.CurrentContact)].labelLastMessage.BackColor = this.backColor;
-                        this.listPanelContacts[this.Contacts.IndexOf(this.CurrentContact)].BackColor = this.backColor;
+                        this.listPanelContacts[this.Contacts.IndexOf(this.CurrentContact)].labelId.BackColor = ClientForm.BackColorPanelCenter;
+                        this.listPanelContacts[this.Contacts.IndexOf(this.CurrentContact)].labelLastMessage.BackColor = ClientForm.BackColorPanelCenter;
+                        this.listPanelContacts[this.Contacts.IndexOf(this.CurrentContact)].BackColor = ClientForm.BackColorPanelCenter;
                     }
 
                     this.CurrentContact = this.Contacts[this.listPanelContacts.IndexOf((PanelContact)sender)];
 
-                    ((PanelContact)sender).labelId.BackColor = this.backColorSelected;
-                    ((PanelContact)sender).labelLastMessage.BackColor = this.backColorSelected;
-                    ((PanelContact)sender).BackColor = this.backColorSelected;
+                    ((PanelContact)sender).labelId.BackColor = ClientForm.BackColorPanelContactSelected;
+                    ((PanelContact)sender).labelLastMessage.BackColor = ClientForm.BackColorPanelContactSelected;
+                    ((PanelContact)sender).BackColor = ClientForm.BackColorPanelContactSelected;
                     ((PanelContact)sender).Selected = true;
 
                     this.form.ChangeChat(idPrevious);
@@ -78,6 +75,12 @@ namespace Client.UserInterface.Controls
         {
             this.listPanelContacts.RemoveAt(this.Contacts.IndexOf(contact));
             this.Contacts.Remove(contact);
+        }
+
+        public void RemoveSelection()
+        {
+            this.dictionaryPanelContacts[this.CurrentContact.Id].RemoveSelection();
+            this.CurrentContact = null;
         }
 
         public void SetFirst(Contact contact)
@@ -134,7 +137,7 @@ namespace Client.UserInterface.Controls
                     Location = new Point(0, this.heightLabel * i),
                     Size = new Size(240, this.heightLabel),
 
-                    BackColor = this.Contacts.IndexOf(this.CurrentContact) != i ? this.backColor : this.backColorSelected
+                    BackColor = this.Contacts.IndexOf(this.CurrentContact) != i ? ClientForm.BackColorPanelCenter : ClientForm.BackColorPanelContactSelected
                 };
                 panelContact.Click += new EventHandler(
                     (sender, e) => 
@@ -146,18 +149,18 @@ namespace Client.UserInterface.Controls
                         {
                             idPrevious = this.CurrentContact.Id;
 
-                            this.listPanelContacts[this.Contacts.IndexOf(this.CurrentContact)].labelId.BackColor = this.backColor;
-                            this.listPanelContacts[this.Contacts.IndexOf(this.CurrentContact)].labelLastMessage.BackColor = this.backColor;
-                            this.listPanelContacts[this.Contacts.IndexOf(this.CurrentContact)].BackColor = this.backColor;
+                            this.listPanelContacts[this.Contacts.IndexOf(this.CurrentContact)].labelId.BackColor = ClientForm.BackColorPanelCenter;
+                            this.listPanelContacts[this.Contacts.IndexOf(this.CurrentContact)].labelLastMessage.BackColor = ClientForm.BackColorPanelCenter;
+                            this.listPanelContacts[this.Contacts.IndexOf(this.CurrentContact)].BackColor = ClientForm.BackColorPanelCenter;
 
                             this.listPanelContacts[this.Contacts.IndexOf(this.CurrentContact)].Selected = false;
                         }
 
                         this.CurrentContact = this.Contacts[this.listPanelContacts.IndexOf((PanelContact)sender)];
 
-                        ((PanelContact)sender).labelId.BackColor = this.backColorSelected;
-                        ((PanelContact)sender).labelLastMessage.BackColor = this.backColorSelected;
-                        ((PanelContact)sender).BackColor = this.backColorSelected;
+                        ((PanelContact)sender).labelId.BackColor = ClientForm.BackColorPanelContactSelected;
+                        ((PanelContact)sender).labelLastMessage.BackColor = ClientForm.BackColorPanelContactSelected;
+                        ((PanelContact)sender).BackColor = ClientForm.BackColorPanelContactSelected;
                         ((PanelContact)sender).Selected = true;
 
                         this.form.ChangeChat(idPrevious);

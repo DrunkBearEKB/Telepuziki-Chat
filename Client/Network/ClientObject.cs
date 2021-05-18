@@ -24,6 +24,7 @@ namespace Client.Network
         public bool AutoReconnect = true;
         public bool IsConnected { get; private set; }
         public string Id { get; private set; }
+        public bool IsHistoryReceived { get; private set; }
 
         public ClientObject(string id)
         {
@@ -51,6 +52,11 @@ namespace Client.Network
         {
             await this.SendPackage(new VoicePackage(idReceiver, this.Id, DateTime.Now, data));
 
+        }
+
+        public async Task RequestHistory(string id)
+        {
+            
         }
 
         private async Task SendPackage(IPackage package)
@@ -144,17 +150,17 @@ namespace Client.Network
             {
                 case TextPackage textPackage:
                     this.OnTextMessageReceive?.Invoke(
-                        new TextMessage(this.Id, textPackage.IdAuthor, textPackage.Time, textPackage.Content));
+                        package.IdAuthor, new TextMessage(this.Id, textPackage.IdAuthor, textPackage.Time, textPackage.Content));
                     break;
                         
                 case VoicePackage voicePackage:
                     this.OnVoiceMessageReceive?.Invoke(
-                        new VoiceMessage(this.Id, voicePackage.IdAuthor, voicePackage.Time, voicePackage.Content));
+                        package.IdAuthor, new VoiceMessage(this.Id, voicePackage.IdAuthor, voicePackage.Time, voicePackage.Content));
                     break;
                         
                 case FilePackage filePackage:
                     this.OnFileMessageReceive?.Invoke(
-                        new FileMessage(this.Id, filePackage.IdAuthor, filePackage.Time, filePackage.Content));
+                        package.IdAuthor, new FileMessage(this.Id, filePackage.IdAuthor, filePackage.Time, filePackage.Content));
                     break;
                         
                 case OnlinePackage:
@@ -194,13 +200,13 @@ namespace Client.Network
             }
         }
 
-        public delegate void TextMessageHandler(TextMessage message);
+        public delegate void TextMessageHandler(string idSender, TextMessage message);
         public event TextMessageHandler OnTextMessageReceive;
         
-        public delegate void VoiceMessageHandler(VoiceMessage message);
+        public delegate void VoiceMessageHandler(string idSender,VoiceMessage message);
         public event VoiceMessageHandler OnVoiceMessageReceive;
         
-        public delegate void FileMessageHandler(FileMessage message);
+        public delegate void FileMessageHandler(string idSender,FileMessage message);
         public event FileMessageHandler OnFileMessageReceive;
         
         public delegate void OnlineCheckingHandler();
@@ -209,7 +215,7 @@ namespace Client.Network
         public delegate void HistoryRequestHandler();
         public event HistoryRequestHandler OnHistoryRequest;
         
-        public delegate void HistoryAnswerHandler(IEnumerable<IMessage> listMessages);
+        public delegate void HistoryAnswerHandler(string id, IEnumerable<IMessage> listMessages);
         public event HistoryAnswerHandler OnHistoryReceive;
         
         public delegate void DisconnectFromServerForcedHandler();

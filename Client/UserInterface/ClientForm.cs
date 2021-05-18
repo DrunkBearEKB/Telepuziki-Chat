@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Management;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading;
 using System.Timers;
 using System.Windows.Forms;
-
+using Client.Common;
 using Client.Network;
 using Client.UserInterface.Controls;
 using Network.Message;
@@ -26,17 +27,16 @@ namespace Client.UserInterface
         private readonly PerformanceCounter ramCounter;
         private readonly ulong ramTotalAmount;
         private Label labelRam;
-        private Ping ping;
-        private Label labelPing;
-        private readonly Color colorPanelLeft = Color.FromArgb(14, 22, 33);
-
+        private static readonly Color BackColorPanelLeft = Color.FromArgb(14, 22, 33);
         private Panel panelCenter;
         private TextBox textBoxSearch;
         private Label labelSearchQuestion;
         private PanelContactsBox panelContactsBox;
-        private readonly Color colorPanelCenter = Color.FromArgb(23, 33, 43);
+        public static Color BackColorPanelCenter = Color.FromArgb(23, 33, 43);
+        public static readonly Color BackColorPanelContactEnter = Color.FromArgb(36, 47, 61);
+        public static readonly Color BackColorPanelContactSelected = Color.FromArgb(43, 82, 120);
         private readonly Color foreColorTextBoxSearch = Color.DarkGray;
-        private readonly Color foreColorTextBoxSearchActive = Color.White;
+        private static readonly Color ForeColorTextBoxSearchActive = Color.White;
 
         private TableLayoutPanel tableLayoutPanelRight;
         private PanelContactInfo panelContactInfo;
@@ -44,30 +44,28 @@ namespace Client.UserInterface
         private TableLayoutPanel tableLayoutPanelEnter;
         private TextBox textBoxEnter;
         private Button buttonSend;
-        private readonly Color colorPanelRight = Color.FromArgb(14, 22, 33);
+        private static readonly Color BackColorPanelRight = Color.FromArgb(14, 22, 33);
 
         private readonly System.Timers.Timer timer;
         private System.Timers.Timer timerTemp;
         private int historyLoaded = 0;
 
         private readonly ClientObject client;
-        public Dictionary<string, List<IMessage>> dictMessageHistory;
-        private readonly Dictionary<string, List<IMessage>> dictMessagesNotSended;
+        private readonly Dictionary<string, List<IMessage>> dictMessageHistory;
+        private readonly Dictionary<string, List<IMessage>> dictMessagesNotSent;
         private readonly Dictionary<string, string> dictMessageNotFinished;
 
         public ClientForm()
         {
             this.dictMessageHistory = new Dictionary<string, List<IMessage>>();
-            this.dictMessagesNotSended = new Dictionary<string, List<IMessage>>();
+            this.dictMessagesNotSent = new Dictionary<string, List<IMessage>>();
             this.dictMessageNotFinished = new Dictionary<string, string>();
 
             this.cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
             this.ramCounter = new PerformanceCounter("Memory", "Available MBytes");
-            this.ping = new Ping();
 
-            ManagementObjectSearcher ramMonitor =    //запрос к WMI для получения памяти ПК
-            new ManagementObjectSearcher("SELECT TotalVisibleMemorySize,FreePhysicalMemory FROM Win32_OperatingSystem");
-            foreach (ManagementObject objram in ramMonitor.Get())
+            ManagementObjectSearcher ramMonitor = new ManagementObjectSearcher("SELECT TotalVisibleMemorySize,FreePhysicalMemory FROM Win32_OperatingSystem");
+            foreach (var objram in ramMonitor.Get())
             {
                 this.ramTotalAmount = Convert.ToUInt64(objram["TotalVisibleMemorySize"]);    //общая память ОЗУ
             }
@@ -79,6 +77,9 @@ namespace Client.UserInterface
             {
                 this.client = new ClientObject(Resources.Id);
                 this.client.Start();
+
+                this.client.OnTextMessageReceive += new ClientObject.TextMessageHandler(this.OnTextMessageReceive);
+                this.client.OnHistoryReceive += new ClientObject.HistoryAnswerHandler(this.OnHistoryReceive);
             }
             catch
             {
@@ -124,7 +125,7 @@ namespace Client.UserInterface
             this.tableLayoutPanel.ColumnStyles.Add(
                 new ColumnStyle()
                 {
-                    Width = 80,
+                    Width = 90,
                     SizeType = SizeType.Absolute
                 });
 
@@ -133,7 +134,7 @@ namespace Client.UserInterface
             {
                 Location = new Point(0, 0),
                 Dock = DockStyle.Fill,
-                BackColor = this.colorPanelLeft,
+                BackColor = BackColorPanelLeft,
                 Margin = new Padding(0)
             };
             this.tableLayoutPanel.Controls.Add(this.panelLeft, 0, 0);
@@ -142,7 +143,7 @@ namespace Client.UserInterface
             {
                 Dock = DockStyle.Bottom,
 
-                BackColor = this.colorPanelLeft,
+                BackColor = BackColorPanelLeft,
                 ForeColor = Color.White,
                 Font = new Font(Resources.FontName, 9F, FontStyle.Regular, GraphicsUnit.Point, 204),
                 TextAlign = ContentAlignment.MiddleLeft
@@ -153,23 +154,12 @@ namespace Client.UserInterface
             {
                 Dock = DockStyle.Bottom,
 
-                BackColor = this.colorPanelLeft,
+                BackColor = BackColorPanelLeft,
                 ForeColor = Color.White,
                 Font = new Font(Resources.FontName, 9F, FontStyle.Regular, GraphicsUnit.Point, 204),
                 TextAlign = ContentAlignment.MiddleLeft
             };
             this.panelLeft.Controls.Add(this.labelRam);
-
-            this.labelPing = new Label
-            {
-                Dock = DockStyle.Bottom,
-
-                BackColor = this.colorPanelLeft,
-                ForeColor = Color.White,
-                Font = new Font(Resources.FontName, 9F, FontStyle.Regular, GraphicsUnit.Point, 204),
-                TextAlign = ContentAlignment.MiddleLeft
-            };
-            this.panelLeft.Controls.Add(this.labelPing);
         }
 
         public void InitializePanelCenter()
@@ -186,7 +176,7 @@ namespace Client.UserInterface
             {
                 Location = new Point(0, 0),
                 Dock = DockStyle.Fill,
-                BackColor = this.colorPanelCenter,
+                BackColor = BackColorPanelCenter,
                 Margin = new Padding(1)
             };
             this.tableLayoutPanel.Controls.Add(this.panelCenter, 1, 0);
@@ -200,7 +190,7 @@ namespace Client.UserInterface
 
                 BackColor = Color.FromArgb(36, 47, 61),
                 Text = "Search...",
-                Font = new Font(Resources.FontName, 13.8F, FontStyle.Regular, GraphicsUnit.Point, 204),
+                Font = new Font(Resources.FontName, 11.8F, FontStyle.Regular, GraphicsUnit.Point, 204),
                 ForeColor = this.foreColorTextBoxSearch,
                 BorderStyle = BorderStyle.FixedSingle,
                 //Multiline = true,
@@ -235,12 +225,12 @@ namespace Client.UserInterface
             //PanelContactsBox
             List<Contact> contacts = new List<Contact>
             {
-                new Contact("alex"),
-                new Contact("grisha"),
-                new Contact("server")
+                new Contact("test1"),
+                new Contact("test2"),
+                new Contact("test3")
             };
 
-            foreach (Contact c in contacts)
+            foreach (var c in contacts)
             {
                 this.dictMessageHistory.Add(c.Id, new List<IMessage>());
             }
@@ -251,7 +241,7 @@ namespace Client.UserInterface
                 Width = this.panelCenter.Width,
                 Height = 2000,
 
-                BackColor = this.colorPanelCenter
+                BackColor = BackColorPanelCenter
             };
             this.panelCenter.Controls.Add(this.panelContactsBox);
         }
@@ -269,7 +259,7 @@ namespace Client.UserInterface
             {
                 Location = new Point(0, 0),
                 Dock = DockStyle.Fill,
-                BackColor = this.colorPanelRight,
+                BackColor = BackColorPanelRight,
 
                 Margin = new Padding(0)
             };
@@ -288,7 +278,7 @@ namespace Client.UserInterface
                 Location = new Point(0, 0),
                 Dock = DockStyle.Fill,
 
-                BackColor = this.colorPanelCenter,
+                BackColor = BackColorPanelCenter,
                 Margin = new Padding(0),
                 Visible = false
             };
@@ -304,8 +294,6 @@ namespace Client.UserInterface
             Panel panelTextBoxChat = new Panel
             {
                 Dock = DockStyle.Fill,
-                //BackgroundImage = Properties.Resources.ImageChatBox_1,
-                //BackgroundImageLayout = ImageLayout.Stretch
             };
             this.tableLayoutPanelRight.Controls.Add(panelTextBoxChat, 0, 1);
 
@@ -314,7 +302,7 @@ namespace Client.UserInterface
             {
                 Dock = DockStyle.Fill,
 
-                BackColor = this.colorPanelLeft,
+                BackColor = BackColorPanelLeft,
                 Font = new Font(Resources.FontName, 12.8F, FontStyle.Regular, GraphicsUnit.Point, 204),
                 ForeColor = Color.White,
                 Multiline = true,
@@ -323,6 +311,7 @@ namespace Client.UserInterface
                 ScrollBars = ScrollBars.Vertical,
                 AcceptsReturn = true,
                 Margin = new Padding(0),
+                Visible = false,
                 TabStop = false
             };
             panelTextBoxChat.Controls.Add(this.textBoxChat);
@@ -337,7 +326,7 @@ namespace Client.UserInterface
             this.tableLayoutPanelEnter = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
-                BackColor = this.colorPanelCenter,
+                BackColor = BackColorPanelCenter,
                 Margin = new Padding(0),
                 Visible = false
             };
@@ -362,7 +351,7 @@ namespace Client.UserInterface
             {
                 Dock = DockStyle.Fill,
 
-                BackColor = this.colorPanelCenter,
+                BackColor = BackColorPanelCenter,
                 Font = new Font(Resources.FontName, 13.8F, FontStyle.Regular, GraphicsUnit.Point, 204),
                 ForeColor = Color.White,
                 Multiline = true,
@@ -380,7 +369,7 @@ namespace Client.UserInterface
                 Size = new Size(55, 55),
                 Anchor = AnchorStyles.Right,
 
-                BackColor = this.colorPanelCenter,
+                BackColor = BackColorPanelCenter,
                 Font = new Font(Resources.FontName, 22.2F, FontStyle.Regular, GraphicsUnit.Point, 204),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
@@ -408,29 +397,29 @@ namespace Client.UserInterface
             this.FormClosed += new FormClosedEventHandler(this.FormCloseEvent);
         }
 
-        public void AddMessage(string sender, IMessage message)
+        public void AddMessage(string idSender, IMessage message)
         {
             this.SuspendLayout();
 
-            if (!this.dictMessageHistory.ContainsKey(sender))
+            if (!this.dictMessageHistory.ContainsKey(idSender))
             {
-                if (sender == "")
+                if (idSender == "")
                 {
-                    sender = "server";
+                    idSender = "server";
                 }
                 else
                 {
-                    this.dictMessageHistory[sender] = new List<IMessage>();
-                    this.panelContactsBox.AddContact(new Contact(sender));
+                    this.dictMessageHistory[idSender] = new List<IMessage>();
+                    this.panelContactsBox.AddContact(new Contact(idSender));
                 }
             }
-            this.dictMessageHistory[sender].Add(message);
+            this.dictMessageHistory[idSender].Add(message);
             switch (message)
             {
                 case TextMessage textMessage:
-                    this.panelContactsBox.SetLastMessage(sender, textMessage.IdAuthor, textMessage.Content);
+                    this.panelContactsBox.SetLastMessage(idSender, textMessage.IdAuthor, textMessage.Content);
 
-                    if (sender == this.panelContactsBox.CurrentContact.Id)
+                    if (idSender == this.panelContactsBox.CurrentContact.Id)
                     {
                         this.textBoxChat.AppendText($"{textMessage.IdAuthor}: {textMessage.Content}     " +
                                                     $"[{textMessage.Time}]" + Environment.NewLine);
@@ -458,9 +447,9 @@ namespace Client.UserInterface
             {
                 try
                 {
-                    this.client.SendText("", $"history {this.panelContactsBox.CurrentContact.Id}");
+                    this.client.RequestHistory(this.panelContactsBox.CurrentContact.Id);
                     Thread.Sleep(100);
-                    this.panelContactsBox.CurrentContact.HistoryReceived = true;
+                    
                 }
                 catch
                 {
@@ -473,42 +462,45 @@ namespace Client.UserInterface
                 this.dictMessageNotFinished.Add(idPrevious, this.textBoxEnter.Text);
             }
 
-            this.textBoxChat.SuspendLayout();
-            while (true)
+            Thread.Sleep(100);
+            if (this.client.IsHistoryReceived)
             {
-                try
+                this.panelContactsBox.CurrentContact.HistoryReceived = true;
+                this.textBoxChat.SuspendLayout();
+                while (true)
                 {
-                    StringBuilder builder = new StringBuilder();
-                    foreach (IMessage m in this.dictMessageHistory[this.panelContactsBox.CurrentContact.Id])
+                    try
                     {
-                        switch (m)
+                        StringBuilder builder = new StringBuilder();
+                        foreach (IMessage m in this.dictMessageHistory[this.panelContactsBox.CurrentContact.Id])
                         {
-                            case TextMessage textMessage:
-                                builder.Append($"{textMessage.IdAuthor}: {textMessage.Content}     " +
-                                               $"[{m.Time}]{Environment.NewLine}");
-                                break;
-                            default:
-                                break;
+                            switch (m)
+                            {
+                                case TextMessage textMessage:
+                                    builder.Append($"{textMessage.IdAuthor}: {textMessage.Content}     " +
+                                                   $"[{m.Time}]{Environment.NewLine}");
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
+                        this.textBoxChat.AppendText(builder.ToString());
+                        break;
                     }
-                    this.textBoxChat.AppendText(builder.ToString());
-                    break;
+                    catch
+                    {
+                        this.textBoxChat.Clear();
+                    }
                 }
-                catch
-                {
-                    this.textBoxChat.Clear();
-                }
+                this.textBoxChat.ResumeLayout();
             }
-            this.textBoxChat.ResumeLayout();
-
             
             if (this.dictMessageNotFinished.ContainsKey(this.panelContactsBox.CurrentContact.Id))
             {
                 this.textBoxEnter.AppendText(this.dictMessageNotFinished[this.panelContactsBox.CurrentContact.Id]);
                 this.dictMessageNotFinished.Remove(this.panelContactsBox.CurrentContact.Id);
             }
-
-
+            
             this.panelContactInfo.ChangeContact(this.panelContactsBox.CurrentContact.Id);
 
             this.ResumeLayout();
@@ -546,13 +538,13 @@ namespace Client.UserInterface
             }
         }
 
-        private void SendNotSendedMessages()
+        private void SendNotSentMessages()
         {
-            foreach (string id in this.dictMessagesNotSended.Keys)
+            foreach (var id in this.dictMessagesNotSent.Keys)
             {
-                if (this.dictMessagesNotSended[id].Count != 0)
+                if (this.dictMessagesNotSent[id].Count != 0)
                 {
-                    foreach (IMessage message in this.dictMessagesNotSended[id])
+                    foreach (var message in this.dictMessagesNotSent[id])
                     {
                         try
                         {
@@ -571,7 +563,7 @@ namespace Client.UserInterface
                                     break;
                             }
                             
-                            this.dictMessagesNotSended[id].Remove(message);
+                            this.dictMessagesNotSent[id].Remove(message);
                         }
                         catch
                         {
@@ -605,7 +597,7 @@ namespace Client.UserInterface
 
             if (this.labelCpu.Visible)
             {
-                int valueCpu = (int)this.cpuCounter.NextValue();
+                var valueCpu = (int)this.cpuCounter.NextValue();
                 this.labelCpu.Text = $"CPU  {valueCpu}%";
                 if (valueCpu < 40)
                 {
@@ -624,7 +616,7 @@ namespace Client.UserInterface
                     this.labelCpu.ForeColor = Color.Red;
                 }
 
-                int valueRam = (int)(100 - (double)ramCounter.NextValue() / (this.ramTotalAmount / 1024) * 100);
+                var valueRam = (int)(100 - (double)ramCounter.NextValue() / (this.ramTotalAmount / 1024) * 100);
                 this.labelRam.Text = $"RAM  {valueRam}%";
                 if (valueRam < 40)
                 {
@@ -642,31 +634,12 @@ namespace Client.UserInterface
                 {
                     this.labelRam.ForeColor = Color.Red;
                 }
-
-                long time = this.ping.Send("192.168.88.123").RoundtripTime; // 192.168.88.123 // www.google.com
-                this.labelPing.Text = $"PING {time}ms";
-                if (time < 10)
-                {
-                    this.labelPing.ForeColor = Color.Lime;
-                }
-                else if (time < 20)
-                {
-                    this.labelPing.ForeColor = Color.Yellow;
-                }
-                else if (time < 50)
-                {
-                    this.labelPing.ForeColor = Color.Orange;
-                }
-                else
-                {
-                    this.labelPing.ForeColor = Color.Red;
-                }
             }
         }
 
         private void OnTimerTempTick(object source, ElapsedEventArgs e)
         {
-            foreach (Contact contact in this.panelContactsBox.Contacts)
+            foreach (var contact in this.panelContactsBox.Contacts)
             {
                 if (!contact.HistoryReceived)
                 {
@@ -698,7 +671,7 @@ namespace Client.UserInterface
         {
             this.SuspendLayout();
 
-            string content = this.textBoxEnter.Text;
+            var content = this.textBoxEnter.Text;
             if (content.Length != 0)
             {
                 IMessage message = new TextMessage(this.panelContactsBox.CurrentContact.Id, this.client.Id, DateTime.Now, content);
@@ -709,12 +682,12 @@ namespace Client.UserInterface
                 }
                 catch
                 {
-                    if (!this.dictMessagesNotSended.ContainsKey(this.panelContactsBox.CurrentContact.Id))
+                    if (!this.dictMessagesNotSent.ContainsKey(this.panelContactsBox.CurrentContact.Id))
                     {
-                        this.dictMessagesNotSended.Add(
+                        this.dictMessagesNotSent.Add(
                             this.panelContactsBox.CurrentContact.Id, new List<IMessage>());
                     }
-                    this.dictMessagesNotSended[this.panelContactsBox.CurrentContact.Id].Add(message);
+                    this.dictMessagesNotSent[this.panelContactsBox.CurrentContact.Id].Add(message);
                 }
 
                 this.textBoxChat.AppendText($"{this.client.Id}: {content} [{DateTime.Now}]{Environment.NewLine}");
@@ -779,18 +752,22 @@ namespace Client.UserInterface
                 {
                     this.labelCpu.Visible = false;
                     this.labelRam.Visible = false;
-                    this.labelPing.Visible = false;
                 }
                 else
                 {
                     this.labelCpu.Visible = true;
                     this.labelRam.Visible = true;
-                    this.labelPing.Visible = true;
                 }
             }
             else if (e.KeyCode == Keys.F5)
             {
                 this.PerformLayout();
+            }
+            else if (e.KeyCode == Keys.Escape)
+            {
+                this.panelContactInfo.Visible = false;
+                this.tableLayoutPanelEnter.Visible = false;
+                this.panelContactsBox.RemoveSelection();
             }
         }
 
@@ -821,6 +798,16 @@ namespace Client.UserInterface
             }
 
             this.textBoxSearch.ResumeLayout();*/
+        }
+
+        private void OnTextMessageReceive(string idSender, TextMessage message)
+        {
+            this.AddMessage(idSender, message);
+        }
+
+        private void OnHistoryReceive(string id, IEnumerable<IMessage> messages)
+        {
+            this.SetHistory(id, messages.ToList());
         }
     }
 }
