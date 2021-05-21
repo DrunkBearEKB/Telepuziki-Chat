@@ -51,6 +51,8 @@ namespace Client.UserInterface
         private PictureBox pictureBoxSend;
         private static readonly Color BackColorPanelRight = Color.FromArgb(14, 22, 33);
 
+        private TextBox textBoxTemp;
+
         private readonly System.Timers.Timer timer;
         private System.Timers.Timer timerTemp;
 
@@ -173,7 +175,7 @@ namespace Client.UserInterface
                 BackColor = BackColorPanelLeft,
                 TabStop = false,
                 Margin = new Padding(0),
-                Image = Image.FromFile(@"..\..\..\Resources\settings.png"),
+                Image = Image.FromFile(@"..\..\..\Resources\settings2.png"),
                 SizeMode = PictureBoxSizeMode.Zoom
             };
             this.pictureBoxSettings.MouseEnter += PictureBoxesMenuEnterEvent;
@@ -366,7 +368,7 @@ namespace Client.UserInterface
             this.tableLayoutPanelRight.RowStyles.Add(
                 new RowStyle
                 {
-                    Height = 60,
+                    Height = 55,
                     SizeType = SizeType.Absolute
                 });
 
@@ -408,24 +410,40 @@ namespace Client.UserInterface
             this.textBoxEnter.KeyDown += this.TextBoxEnterKeyDownEvent;
             this.tableLayoutPanelEnter.Controls.Add(this.textBoxEnter, 0, 0);
 
-            this.pictureBoxSend = new PictureBox
+            var panelTemp = new Panel
             {
                 Location = new Point(940, 430),
                 Size = new Size(55, 55),
-
                 BackColor = BackColorPanelCenter,
                 TabStop = false,
                 Margin = new Padding(0),
-                BorderStyle = BorderStyle.FixedSingle,
+                BorderStyle = BorderStyle.FixedSingle
+            };
+            this.tableLayoutPanelEnter.Controls.Add(panelTemp, 1, 0);
+            
+            this.pictureBoxSend = new PictureBox
+            {
+                Location = new Point(9, 9),
+                Size = new Size(35, 35),
+
+                BackColor = BackColorPanelCenter,
+                TabStop = false,
                 Image = Image.FromFile(@"..\..\..\Resources\send.png"),
                 SizeMode = PictureBoxSizeMode.Zoom
             };
             this.pictureBoxSend.Click += this.PictureBoxSendClickEvent;
-            this.tableLayoutPanelEnter.Controls.Add(this.pictureBoxSend, 1, 0);
+            panelTemp.Controls.Add(this.pictureBoxSend);
         }
 
         private void InitializeForm()
         {
+            this.textBoxTemp = new TextBox
+            {
+                Location = new Point(0, 0),
+                Size = new Size(25, 25)
+            };
+            this.Controls.Add(this.textBoxTemp);
+            
             this.MinimumSize = new Size(650, 350);
 
             this.BackColor = Color.Black;
@@ -478,6 +496,8 @@ namespace Client.UserInterface
         public async void ChangeChat(string idPrevious)
         {
             this.SuspendLayout();
+
+            this.textBoxTemp.Focus();
 
             if (!this.panelContactInfo.Visible)
             {
@@ -767,17 +787,17 @@ namespace Client.UserInterface
 
         private async void TextBoxSearchTextChanged(object sender, EventArgs e)
         {
-            /*if (this.textBoxSearch.Text.Contains(Environment.NewLine))
+            if (this.textBoxSearch.Text.Contains(Environment.NewLine))
             {
                 this.textBoxSearch.Text = this.textBoxSearch.Text.Substring(0, this.textBoxSearch.Text.Length - 1);
                 await this.client.SendSearchRequest(this.textBoxSearch.Text);
-            }*/
+            }
         }
 
         private async void TextBoxSearchEnterEvent(object sender, EventArgs e)
         {
-            this.textBoxSearch.Text = this.textBoxSearch.Text.Substring(0, this.textBoxSearch.Text.Length - 1);
-            await this.client.SendSearchRequest(this.textBoxSearch.Text);
+            /*this.textBoxSearch.Text = this.textBoxSearch.Text.Substring(0, this.textBoxSearch.Text.Length - 1);
+            await this.client.SendSearchRequest(this.textBoxSearch.Text);*/
         }
 
         private void TextBoxSearchGotFocus(object sender, EventArgs e)
