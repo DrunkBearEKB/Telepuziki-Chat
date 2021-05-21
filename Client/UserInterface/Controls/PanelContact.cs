@@ -51,15 +51,15 @@ namespace Client.UserInterface.Controls
                     
                     if (this.Selected)
                     {
-                        this.labelId.BackColor = ClientForm.BackColorPanelContactSelected;
-                        this.labelLastMessage.BackColor = ClientForm.BackColorPanelContactSelected;
-                        this.BackColor = ClientForm.BackColorPanelContactSelected;
+                        this.labelId.BackColor = ClientForm.BackColorSelected;
+                        this.labelLastMessage.BackColor = ClientForm.BackColorSelected;
+                        this.BackColor = ClientForm.BackColorSelected;
                     }
                     else
                     {
-                        this.labelId.BackColor = ClientForm.BackColorPanelContactEnter;
-                        this.labelLastMessage.BackColor = ClientForm.BackColorPanelContactEnter;
-                        this.BackColor = ClientForm.BackColorPanelContactEnter;
+                        this.labelId.BackColor = ClientForm.BackColorEntered;
+                        this.labelLastMessage.BackColor = ClientForm.BackColorEntered;
+                        this.BackColor = ClientForm.BackColorEntered;
                     }
 
                     this.ResumeLayout();
@@ -71,9 +71,9 @@ namespace Client.UserInterface.Controls
                     
                     if (this.Selected)
                     {
-                        this.labelId.BackColor = ClientForm.BackColorPanelContactSelected;
-                        this.labelLastMessage.BackColor = ClientForm.BackColorPanelContactSelected;
-                        this.BackColor = ClientForm.BackColorPanelContactSelected;
+                        this.labelId.BackColor = ClientForm.BackColorSelected;
+                        this.labelLastMessage.BackColor = ClientForm.BackColorSelected;
+                        this.BackColor = ClientForm.BackColorSelected;
                     }
                     else
                     {
@@ -107,15 +107,15 @@ namespace Client.UserInterface.Controls
                     
                     if (this.Selected)
                     {
-                        this.labelId.BackColor = ClientForm.BackColorPanelContactSelected;
-                        this.labelLastMessage.BackColor = ClientForm.BackColorPanelContactSelected;
-                        this.BackColor = ClientForm.BackColorPanelContactSelected;
+                        this.labelId.BackColor = ClientForm.BackColorSelected;
+                        this.labelLastMessage.BackColor = ClientForm.BackColorSelected;
+                        this.BackColor = ClientForm.BackColorSelected;
                     }
                     else
                     {
-                        this.labelId.BackColor = ClientForm.BackColorPanelContactEnter;
-                        this.labelLastMessage.BackColor = ClientForm.BackColorPanelContactEnter;
-                        this.BackColor = ClientForm.BackColorPanelContactEnter;
+                        this.labelId.BackColor = ClientForm.BackColorEntered;
+                        this.labelLastMessage.BackColor = ClientForm.BackColorEntered;
+                        this.BackColor = ClientForm.BackColorEntered;
                     }
 
                     this.ResumeLayout();
@@ -127,9 +127,9 @@ namespace Client.UserInterface.Controls
                     
                     if (this.Selected)
                     {
-                        this.labelId.BackColor = ClientForm.BackColorPanelContactSelected;
-                        this.labelLastMessage.BackColor = ClientForm.BackColorPanelContactSelected;
-                        this.BackColor = ClientForm.BackColorPanelContactSelected;
+                        this.labelId.BackColor = ClientForm.BackColorSelected;
+                        this.labelLastMessage.BackColor = ClientForm.BackColorSelected;
+                        this.BackColor = ClientForm.BackColorSelected;
                     }
                     else
                     {
@@ -184,9 +184,9 @@ namespace Client.UserInterface.Controls
             {
                 this.SuspendLayout();
 
-                this.labelId.BackColor = ClientForm.BackColorPanelContactEnter;
-                this.labelLastMessage.BackColor = ClientForm.BackColorPanelContactEnter;
-                this.BackColor = ClientForm.BackColorPanelContactEnter;
+                this.labelId.BackColor = ClientForm.BackColorEntered;
+                this.labelLastMessage.BackColor = ClientForm.BackColorEntered;
+                this.BackColor = ClientForm.BackColorEntered;
 
                 this.ResumeLayout();
             }

@@ -1,17 +1,16 @@
 ﻿using System.Collections.Generic;
-
 using Network.Message;
 
-namespace Server.History
+namespace Client.DataBase
 {
-    public interface IHistory
+    public interface IClientDataBaseHandler
     {
-        List<IMessage> GetAll(string idClient1, string idClient2);
+        List<IMessage> GetAllMessages(string idClient1, string idClient2);
         
         List<IMessage> GetTextMessages(string idClient1, string idClient2);
         
         List<IMessage> GetVoiceMessages(string idClient1, string idClient2);
         
-        List<IMessage> GetFileMessages(string idClient1, string idClient2);
+        List<IMessage> GetFileMs(string idClient1, string idClient2);
     }
 }

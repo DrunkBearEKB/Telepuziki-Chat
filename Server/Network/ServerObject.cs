@@ -7,8 +7,7 @@ using System.Timers;
 using Timer = System.Timers.Timer;
 
 using Network.Package;
-
-using Server.History;
+using Server.DataBase;
 
 namespace Server.Network
 {
@@ -18,8 +17,8 @@ namespace Server.Network
         private readonly Dictionary<string, ConnectedClient> dictionaryConnectedClients;
         private readonly int port = 9090;
         private readonly PackageCreator packageCreator;
-
-        private IHistory messageHistory;
+        
+        public IServerDataBaseHandler ServerDataBaseHandler { get; }
 
         private Timer timerOnlineChecking;
         private const int AmountSecondsBetweenOnlineChecking = 5;
@@ -29,11 +28,12 @@ namespace Server.Network
             this.listener = new TcpListener(IPAddress.Any, port);
             this.dictionaryConnectedClients = new Dictionary<string, ConnectedClient>();
             this.packageCreator = new PackageCreator();
+            
+            this.LoadMessageHistory();
         }
 
         public async Task Start()
         {
-            await this.LoadMessageHistory();
             this.StartTimers();
             this.listener.Start();
             this.OnStarted?.Invoke();
@@ -126,7 +126,7 @@ namespace Server.Network
             }
         }
 
-        private async Task LoadMessageHistory()
+        private void LoadMessageHistory()
         {
             // TODO Логика работы при загрузке истории
         }

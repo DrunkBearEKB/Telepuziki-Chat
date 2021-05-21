@@ -15,7 +15,7 @@ namespace Client.Network
     public class ClientObject
     {
         private TcpClient tcpClient;
-        private readonly string ipServer = "127.0.0.1";  // 192.168.88.71  127.0.0.1
+        private readonly string ipServer = "192.168.1.2";  // 192.168.88.71  127.0.0.1  192.168.43.12
         private readonly int portServer = 9090;
         private NetworkStream stream;
         
@@ -32,7 +32,7 @@ namespace Client.Network
             this.packageCreator = new PackageCreator();
         }
         
-        public async Task Start()
+        public async void Start()
         {
             await this.ConnectToServer();
             await this.StartReceivingPackages();
@@ -51,7 +51,11 @@ namespace Client.Network
         public async Task SendVoice(string idReceiver, byte[] data)
         {
             await this.SendPackage(new VoicePackage(idReceiver, this.Id, DateTime.Now, data));
-
+        }
+        
+        public async Task SendSearchRequest(string idRequest)
+        {
+            await this.SendPackage(new UsersListRequestPackage("", this.Id, idRequest));
         }
 
         public async Task RequestHistory(string id)
@@ -179,6 +183,10 @@ namespace Client.Network
                 case HistoryAnswerPackage historyAnswerPackage:
                     // TODO Логика работы в ситуации когда пришёл ответ от сервера на получение истории сообщений
                     break;
+                
+                case UsersListAnswerPackage usersListAnswerPackage:
+                    this.OnUsersListAnswerReceive?.Invoke(usersListAnswerPackage.Users);
+                    break;
             }
         }
 
@@ -220,5 +228,8 @@ namespace Client.Network
         
         public delegate void DisconnectFromServerForcedHandler();
         public event DisconnectFromServerForcedHandler OnDisconnectFromServer;
+        
+        public delegate void UsersListAnswerHandler(List<string> users);
+        public event UsersListAnswerHandler OnUsersListAnswerReceive;
     }
 }

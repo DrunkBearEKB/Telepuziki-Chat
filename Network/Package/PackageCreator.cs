@@ -69,6 +69,11 @@ namespace Network.Package
             return this.queuePackagesReady.Dequeue();
         }
 
+        public int GetAmountPackagesReady()
+        {
+            return this.queuePackagesReady.Count;
+        }
+
         public static byte[] GetRawFormattedData(PackageType type, params string[] arrayString)
         {
             byte[] result = arrayString

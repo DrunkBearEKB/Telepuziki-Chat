@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
@@ -101,6 +102,15 @@ namespace Server.Network
                 
                     case HistoryAnswerPackage historyAnswerPackage:
                         // TODO Логика работы в ситуации когда пришёл ответ от клиента на получение истории сообщений
+                        break;
+                    
+                    case UsersListRequestPackage usersListRequestPackage:
+                        //List<string> users = 
+                        //    this.server.dataBaseHandler.GetUsersWithSimilarId(usersListRequestPackage.IdRequest);
+                        List<string> users = new List<string> {"grisha", "julia", "vova", "artem"};
+                        UsersListAnswerPackage packageAnswer = new UsersListAnswerPackage(
+                            this.Id, "", users);
+                        await this.server.SendPackage(packageAnswer);
                         break;
                 }
             }
