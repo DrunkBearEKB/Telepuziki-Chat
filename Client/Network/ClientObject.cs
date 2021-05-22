@@ -58,9 +58,9 @@ namespace Client.Network
             await this.SendPackage(new UsersListRequestPackage("", this.Id, idRequest));
         }
 
-        public async Task RequestHistory(string id)
+        public async Task RequestHistory(string id, DateTime timeUntil)
         {
-            
+            await this.SendPackage(new HistoryRequestPackage("", this.Id, id, timeUntil));
         }
 
         private async Task SendPackage(IPackage package)

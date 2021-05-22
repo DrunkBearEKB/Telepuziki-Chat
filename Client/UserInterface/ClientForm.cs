@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Management;
 using System.Net.NetworkInformation;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -55,6 +56,9 @@ namespace Client.UserInterface
 
         private readonly System.Timers.Timer timer;
         private System.Timers.Timer timerTemp;
+
+        private static string pathResources = "..\\..\\..\\Resources\\";
+        private static string theme = "themeDark";
 
         private readonly ClientObject client;
         private readonly Dictionary<string, List<IMessage>> dictMessageHistory;
@@ -159,11 +163,11 @@ namespace Client.UserInterface
                 BackColor = BackColorPanelLeft,
                 TabStop = false,
                 Margin = new Padding(0),
-                Image = Image.FromFile(@"..\..\..\Resources\defaultIcon.png"),
+                Image = Image.FromFile(pathResources + theme + "\\profileIconDefault.png"),
                 SizeMode = PictureBoxSizeMode.Zoom
             };
-            this.pictureBoxProfile.MouseEnter += PictureBoxesMenuEnterEvent;
-            this.pictureBoxProfile.MouseLeave += PictureBoxesMenuLeaveEvent;
+            this.pictureBoxProfile.MouseEnter += PictureBoxesEnterEvent;
+            this.pictureBoxProfile.MouseLeave += PictureBoxesLeaveEvent;
             this.panelLeft.Controls.Add(this.pictureBoxProfile);
 
             this.pictureBoxSettings = new PictureBox
@@ -175,11 +179,11 @@ namespace Client.UserInterface
                 BackColor = BackColorPanelLeft,
                 TabStop = false,
                 Margin = new Padding(0),
-                Image = Image.FromFile(@"..\..\..\Resources\settings2.png"),
+                Image = Image.FromFile(pathResources + theme + "\\settings.png"),
                 SizeMode = PictureBoxSizeMode.Zoom
             };
-            this.pictureBoxSettings.MouseEnter += PictureBoxesMenuEnterEvent;
-            this.pictureBoxSettings.MouseLeave += PictureBoxesMenuLeaveEvent;
+            this.pictureBoxSettings.MouseEnter += PictureBoxesEnterEvent;
+            this.pictureBoxSettings.MouseLeave += PictureBoxesLeaveEvent;
             this.panelLeft.Controls.Add(this.pictureBoxSettings);
 
             this.labelCpu = new Label
@@ -428,7 +432,7 @@ namespace Client.UserInterface
 
                 BackColor = BackColorPanelCenter,
                 TabStop = false,
-                Image = Image.FromFile(@"..\..\..\Resources\send.png"),
+                Image = Image.FromFile(pathResources + theme + "\\send.png"),
                 SizeMode = PictureBoxSizeMode.Zoom
             };
             this.pictureBoxSend.Click += this.PictureBoxSendClickEvent;
@@ -514,9 +518,7 @@ namespace Client.UserInterface
             {
                 try
                 {
-                    await this.client.RequestHistory(this.panelContactsBox.CurrentContact.Id);
-                    Thread.Sleep(100);
-                    
+                    await this.client.RequestHistory(this.panelContactsBox.CurrentContact.Id, DateTime.MinValue);
                 }
                 catch
                 {
@@ -732,21 +734,44 @@ namespace Client.UserInterface
             }
         }
         
-        private void PictureBoxesMenuEnterEvent(object sender, EventArgs e)
+        private void PictureBoxesEnterEvent(object sender, EventArgs e)
         {
             this.SuspendLayout();
-            
-            //((Button) sender).BackColor = BackColorEntered;
+
+            PictureBox pictureBox = sender as PictureBox;
+            if (pictureBox == this.pictureBoxProfile)
+            {
+                pictureBox.Image = Image.FromFile(pathResources + theme + "\\profileIconDefault_entered.png");
+            }
+            else if (pictureBox == this.pictureBoxSettings)
+            {
+                pictureBox.Image = Image.FromFile(pathResources + theme + "\\settings_entered.png");
+            }
+            else if (pictureBox == this.pictureBoxSend)
+            {
+                pictureBox.Image = Image.FromFile(pathResources + theme + "\\send_entered.png");
+            }
             
             this.ResumeLayout();
         }
         
-        private void PictureBoxesMenuLeaveEvent(object sender, EventArgs e)
+        private void PictureBoxesLeaveEvent(object sender, EventArgs e)
         {
             this.SuspendLayout();
 
-            //this.buttonProfile.BackColor = BackColorPanelLeft;
-            //this.buttonSettings.BackColor = BackColorPanelLeft;
+            PictureBox pictureBox = sender as PictureBox;
+            if (pictureBox == this.pictureBoxProfile)
+            {
+                pictureBox.Image = Image.FromFile(pathResources + theme + "\\profileIconDefault.png");
+            }
+            else if (pictureBox == this.pictureBoxSettings)
+            {
+                pictureBox.Image = Image.FromFile(pathResources + theme + "\\settings.png");
+            }
+            else if (pictureBox == this.pictureBoxSend)
+            {
+                pictureBox.Image = Image.FromFile(pathResources + theme + "\\send.png");
+            }
 
             this.ResumeLayout();
         }

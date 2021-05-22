@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
 using Network.Extensions;
+using Network.Message;
+using Network.Message.ExchangingMessages;
 using Network.Package;
 using Network.Package.ExchangingPackages;
 
@@ -85,6 +88,23 @@ namespace Server.Network
             if (package.IdReceiver != "")
             {
                 await this.server.SendPackage(package);
+
+                if (package.Type == PackageType.Text || package.Type == PackageType.Voice ||
+                    package.Type == PackageType.File)
+                {
+                    IMessage message = package switch
+                    {
+                        TextPackage textPackage => new TextMessage(this.Id, textPackage.IdAuthor, textPackage.Time,
+                            textPackage.Content),
+                        VoicePackage voicePackage => new VoiceMessage(this.Id, voicePackage.IdAuthor, voicePackage.Time,
+                            voicePackage.Content),
+                        FilePackage filePackage => new FileMessage(this.Id, filePackage.IdAuthor, filePackage.Time,
+                            filePackage.Content)
+                    };
+
+                    this.server.ServerDataBase.AddMessage(message);
+                }
+                
                 this.OnGetPackage?.Invoke(package);
             }
             else
@@ -97,20 +117,28 @@ namespace Server.Network
                         break;
                 
                     case HistoryRequestPackage historyRequestPackage:
-                        // TODO Логика работы в ситуации когда пришёл запрос от клиента на получение истории сообщений
-                        break;
-                
-                    case HistoryAnswerPackage historyAnswerPackage:
-                        // TODO Логика работы в ситуации когда пришёл ответ от клиента на получение истории сообщений
+                        List<IMessage> messages = this.server.ServerDataBase.GetMessages(
+                            this.Id, historyRequestPackage.IdRequest, historyRequestPackage.TimeUntil);
+                        HistoryAnswerPackage packageAnswer1 = new HistoryAnswerPackage(this.Id,"", 
+                            messages.Select(message =>
+                            {
+                                Tuple<MessageType, string> result = message switch
+                                {
+                                    TextMessage textMessage => new Tuple<MessageType, string>(message.Type,
+                                        textMessage.Content),
+                                    VoiceMessage => new Tuple<MessageType, string>(message.Type, "voice message"),
+                                    FileMessage => new Tuple<MessageType, string>(message.Type, "file")
+                                };
+                                return result;
+                            }).ToList());
+                        await this.server.SendPackage(packageAnswer1);
                         break;
                     
                     case UsersListRequestPackage usersListRequestPackage:
-                        //List<string> users = 
-                        //    this.server.dataBaseHandler.GetUsersWithSimilarId(usersListRequestPackage.IdRequest);
-                        List<string> users = new List<string> {"grisha", "julia", "vova", "artem"};
-                        UsersListAnswerPackage packageAnswer = new UsersListAnswerPackage(
-                            this.Id, "", users);
-                        await this.server.SendPackage(packageAnswer);
+                        List<string> users = this.server.ServerDataBase
+                            .GetUsersWithSimilarId(usersListRequestPackage.IdRequest);
+                        UsersListAnswerPackage packageAnswer2 = new UsersListAnswerPackage(this.Id, "", users);
+                        await this.server.SendPackage(packageAnswer2);
                         break;
                 }
             }

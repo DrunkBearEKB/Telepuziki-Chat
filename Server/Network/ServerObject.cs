@@ -18,7 +18,7 @@ namespace Server.Network
         private readonly int port = 9090;
         private readonly PackageCreator packageCreator;
         
-        public IServerDataBaseHandler ServerDataBaseHandler { get; }
+        public IServerDataBase ServerDataBase { get; private set; }
 
         private Timer timerOnlineChecking;
         private const int AmountSecondsBetweenOnlineChecking = 5;
@@ -42,7 +42,7 @@ namespace Server.Network
 
         private void StartTimers()
         {
-            this.timerOnlineChecking = new Timer(ServerObject.AmountSecondsBetweenOnlineChecking * 1000)
+            this.timerOnlineChecking = new Timer(AmountSecondsBetweenOnlineChecking * 1000)
             {
                 AutoReset = true, 
                 Enabled = true
@@ -109,8 +109,13 @@ namespace Server.Network
                     
             this.dictionaryConnectedClients.Add(connectedClient.Id, connectedClient);
             this.OnClientConnected?.Invoke(connectedClient.Id);
+
+            if (!this.ServerDataBase.ContainsClient(connectedClient.Id))
+            {
+                this.ServerDataBase.AddClient(connectedClient.Id);
+            }
                         
-            connectedClient.StartListen();
+            await connectedClient.StartListen();
         }
 
         private async Task HandleAlreadyConnectedClient(IPackage package, TcpClient client)
@@ -128,7 +133,7 @@ namespace Server.Network
 
         private void LoadMessageHistory()
         {
-            // TODO Логика работы при загрузке истории
+            this.ServerDataBase = new ServerDataBaseTemp();
         }
 
         public async Task SendPackage(IPackage package)
