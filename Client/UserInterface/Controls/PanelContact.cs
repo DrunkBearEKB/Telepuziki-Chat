@@ -42,7 +42,7 @@ namespace Client.UserInterface.Controls
 
                 Text = this.id,
                 Font = new Font(Resources.FontName, 11.8F, FontStyle.Bold, GraphicsUnit.Point, 204),
-                ForeColor = Color.White
+                ForeColor = ClientForm.Style.ForeColorResidual
             };
             this.labelId.MouseEnter += new EventHandler(
                 (sender, e) =>
@@ -51,15 +51,15 @@ namespace Client.UserInterface.Controls
                     
                     if (this.Selected)
                     {
-                        this.labelId.BackColor = ClientForm.BackColorSelected;
-                        this.labelLastMessage.BackColor = ClientForm.BackColorSelected;
-                        this.BackColor = ClientForm.BackColorSelected;
+                        this.labelId.BackColor = ClientForm.Style.BackColorSelected;
+                        this.labelLastMessage.BackColor = ClientForm.Style.BackColorSelected;
+                        this.BackColor = ClientForm.Style.BackColorSelected;
                     }
                     else
                     {
-                        this.labelId.BackColor = ClientForm.BackColorEntered;
-                        this.labelLastMessage.BackColor = ClientForm.BackColorEntered;
-                        this.BackColor = ClientForm.BackColorEntered;
+                        this.labelId.BackColor = ClientForm.Style.BackColorEntered;
+                        this.labelLastMessage.BackColor = ClientForm.Style.BackColorEntered;
+                        this.BackColor = ClientForm.Style.BackColorEntered;
                     }
 
                     this.ResumeLayout();
@@ -71,15 +71,15 @@ namespace Client.UserInterface.Controls
                     
                     if (this.Selected)
                     {
-                        this.labelId.BackColor = ClientForm.BackColorSelected;
-                        this.labelLastMessage.BackColor = ClientForm.BackColorSelected;
-                        this.BackColor = ClientForm.BackColorSelected;
+                        this.labelId.BackColor = ClientForm.Style.BackColorSelected;
+                        this.labelLastMessage.BackColor = ClientForm.Style.BackColorSelected;
+                        this.BackColor = ClientForm.Style.BackColorSelected;
                     }
                     else
                     {
-                        this.labelId.BackColor = ClientForm.BackColorPanelCenter;
-                        this.labelLastMessage.BackColor = ClientForm.BackColorPanelCenter;
-                        this.BackColor = ClientForm.BackColorPanelCenter;
+                        this.labelId.BackColor = ClientForm.Style.BackColorSecondary;
+                        this.labelLastMessage.BackColor = ClientForm.Style.BackColorSecondary;
+                        this.BackColor = ClientForm.Style.BackColorSecondary;
                     }
 
                     this.ResumeLayout();
@@ -98,7 +98,7 @@ namespace Client.UserInterface.Controls
 
                 Text = this.LastMessage,
                 Font = new Font(Resources.FontName, 10.8F, FontStyle.Bold, GraphicsUnit.Point, 204),
-                ForeColor = Color.White
+                ForeColor = ClientForm.Style.ForeColorResidual
             };
             this.labelLastMessage.MouseEnter += new EventHandler(
                 (sender, e) =>
@@ -107,15 +107,15 @@ namespace Client.UserInterface.Controls
                     
                     if (this.Selected)
                     {
-                        this.labelId.BackColor = ClientForm.BackColorSelected;
-                        this.labelLastMessage.BackColor = ClientForm.BackColorSelected;
-                        this.BackColor = ClientForm.BackColorSelected;
+                        this.labelId.BackColor = ClientForm.Style.BackColorSelected;
+                        this.labelLastMessage.BackColor = ClientForm.Style.BackColorSelected;
+                        this.BackColor = ClientForm.Style.BackColorSelected;
                     }
                     else
                     {
-                        this.labelId.BackColor = ClientForm.BackColorEntered;
-                        this.labelLastMessage.BackColor = ClientForm.BackColorEntered;
-                        this.BackColor = ClientForm.BackColorEntered;
+                        this.labelId.BackColor = ClientForm.Style.BackColorEntered;
+                        this.labelLastMessage.BackColor = ClientForm.Style.BackColorEntered;
+                        this.BackColor = ClientForm.Style.BackColorEntered;
                     }
 
                     this.ResumeLayout();
@@ -127,15 +127,15 @@ namespace Client.UserInterface.Controls
                     
                     if (this.Selected)
                     {
-                        this.labelId.BackColor = ClientForm.BackColorSelected;
-                        this.labelLastMessage.BackColor = ClientForm.BackColorSelected;
-                        this.BackColor = ClientForm.BackColorSelected;
+                        this.labelId.BackColor = ClientForm.Style.BackColorSelected;
+                        this.labelLastMessage.BackColor = ClientForm.Style.BackColorSelected;
+                        this.BackColor = ClientForm.Style.BackColorSelected;
                     }
                     else
                     {
-                        this.labelId.BackColor = ClientForm.BackColorPanelCenter;
-                        this.labelLastMessage.BackColor = ClientForm.BackColorPanelCenter;
-                        this.BackColor = ClientForm.BackColorPanelCenter;
+                        this.labelId.BackColor = ClientForm.Style.BackColorSecondary;
+                        this.labelLastMessage.BackColor = ClientForm.Style.BackColorSecondary;
+                        this.BackColor = ClientForm.Style.BackColorSecondary;
                     }
 
                     this.ResumeLayout();
@@ -169,9 +169,9 @@ namespace Client.UserInterface.Controls
             this.SuspendLayout();
 
             this.Selected = false;
-            this.labelId.BackColor = ClientForm.BackColorPanelCenter;
-            this.labelLastMessage.BackColor = ClientForm.BackColorPanelCenter;
-            this.BackColor = ClientForm.BackColorPanelCenter;
+            this.labelId.BackColor = ClientForm.Style.BackColorSecondary;
+            this.labelLastMessage.BackColor = ClientForm.Style.BackColorSecondary;
+            this.BackColor = ClientForm.Style.BackColorSecondary;
 
             this.ResumeLayout();
         }
@@ -184,9 +184,9 @@ namespace Client.UserInterface.Controls
             {
                 this.SuspendLayout();
 
-                this.labelId.BackColor = ClientForm.BackColorEntered;
-                this.labelLastMessage.BackColor = ClientForm.BackColorEntered;
-                this.BackColor = ClientForm.BackColorEntered;
+                this.labelId.BackColor = ClientForm.Style.BackColorEntered;
+                this.labelLastMessage.BackColor = ClientForm.Style.BackColorEntered;
+                this.BackColor = ClientForm.Style.BackColorEntered;
 
                 this.ResumeLayout();
             }
@@ -200,9 +200,9 @@ namespace Client.UserInterface.Controls
             {
                 this.SuspendLayout();
 
-                this.labelId.BackColor = ClientForm.BackColorPanelCenter;
-                this.labelLastMessage.BackColor = ClientForm.BackColorPanelCenter;
-                this.BackColor = ClientForm.BackColorPanelCenter;
+                this.labelId.BackColor = ClientForm.Style.BackColorSecondary;
+                this.labelLastMessage.BackColor = ClientForm.Style.BackColorSecondary;
+                this.BackColor = ClientForm.Style.BackColorSecondary;
 
                 this.ResumeLayout();
             }

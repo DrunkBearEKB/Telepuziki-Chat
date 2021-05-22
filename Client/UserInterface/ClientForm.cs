@@ -4,8 +4,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Management;
-using System.Net.NetworkInformation;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -14,6 +12,7 @@ using System.Windows.Forms;
 using Client.Common;
 using Client.Network;
 using Client.UserInterface.Controls;
+using Client.UserInterface.Styles;
 using Network.Message;
 using Network.Message.ExchangingMessages;
 
@@ -25,21 +24,18 @@ namespace Client.UserInterface
 
         private Panel panelLeft;
         private PictureBox pictureBoxProfile;
+        private PictureBox pictureBoxChats;
         private PictureBox pictureBoxSettings;
         private readonly PerformanceCounter cpuCounter;
         private Label labelCpu;
         private readonly PerformanceCounter ramCounter;
         private readonly ulong ramTotalAmount;
         private Label labelRam;
-        private static readonly Color BackColorPanelLeft = Color.FromArgb(14, 22, 33);
         
         private Panel panelCenter;
         private TextBox textBoxSearch;
         private Label labelSearchQuestion;
         private PanelContactsBox panelContactsBox;
-        public static Color BackColorPanelCenter = Color.FromArgb(23, 33, 43);
-        public static readonly Color BackColorEntered = Color.FromArgb(36, 47, 61);
-        public static readonly Color BackColorSelected = Color.FromArgb(43, 82, 120);
         private static readonly Color ForeColorTextBoxSearch = Color.DarkGray;
         private static readonly Color ForeColorTextBoxSearchActive = Color.White;
 
@@ -50,7 +46,8 @@ namespace Client.UserInterface
         private TableLayoutPanel tableLayoutPanelEnter;
         private TextBox textBoxEnter;
         private PictureBox pictureBoxSend;
-        private static readonly Color BackColorPanelRight = Color.FromArgb(14, 22, 33);
+
+        public static Style Style;
 
         private TextBox textBoxTemp;
 
@@ -70,6 +67,8 @@ namespace Client.UserInterface
             this.dictMessageHistory = new Dictionary<string, List<IMessage>>();
             this.dictMessagesNotSent = new Dictionary<string, List<IMessage>>();
             this.dictMessageNotFinished = new Dictionary<string, string>();
+
+            Style = new BlackPinkStyle("..\\..\\..\\Resources\\");
 
             this.cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
             this.ramCounter = new PerformanceCounter("Memory", "Available MBytes");
@@ -147,39 +146,55 @@ namespace Client.UserInterface
             {
                 Location = new Point(0, 0),
                 Dock = DockStyle.Fill,
-                BackColor = BackColorPanelLeft,
+                BackColor = Style.BackColorMain,
                 Margin = new Padding(0),
                 BorderStyle = BorderStyle.FixedSingle
             };
             this.tableLayoutPanel.Controls.Add(this.panelLeft, 0, 0);
 
             var pictureBoxSize = 40;
-            var padding = 10;
+            var padding = 20;
             this.pictureBoxProfile = new PictureBox
             {
                 Location = new Point((width - pictureBoxSize) / 2, (width - pictureBoxSize) / 2),
                 Size = new Size(pictureBoxSize, pictureBoxSize),
 
-                BackColor = BackColorPanelLeft,
+                BackColor = Style.BackColorMain,
                 TabStop = false,
                 Margin = new Padding(0),
-                Image = Image.FromFile(pathResources + theme + "\\profileIconDefault.png"),
+                Image = Style.GetImage("profile", false),
                 SizeMode = PictureBoxSizeMode.Zoom
             };
             this.pictureBoxProfile.MouseEnter += PictureBoxesEnterEvent;
             this.pictureBoxProfile.MouseLeave += PictureBoxesLeaveEvent;
             this.panelLeft.Controls.Add(this.pictureBoxProfile);
+            
+            this.pictureBoxChats = new PictureBox
+            {
+                Location = new Point((width - pictureBoxSize) / 2, 
+                    (width - pictureBoxSize) / 2 + pictureBoxSize + padding),
+                Size = new Size(pictureBoxSize, pictureBoxSize),
+
+                BackColor = Style.BackColorMain,
+                TabStop = false,
+                Margin = new Padding(0),
+                Image = Style.GetImage("chats", false),
+                SizeMode = PictureBoxSizeMode.Zoom
+            };
+            this.pictureBoxChats.MouseEnter += PictureBoxesEnterEvent;
+            this.pictureBoxChats.MouseLeave += PictureBoxesLeaveEvent;
+            this.panelLeft.Controls.Add(this.pictureBoxChats);
 
             this.pictureBoxSettings = new PictureBox
             {
                 Location = new Point((width - pictureBoxSize) / 2, 
-                    (width - pictureBoxSize) + pictureBoxSize + padding),
+                    (width - pictureBoxSize) / 2 + 2 * (pictureBoxSize + padding)),
                 Size = new Size(pictureBoxSize, pictureBoxSize),
 
-                BackColor = BackColorPanelLeft,
+                BackColor = Style.BackColorMain,
                 TabStop = false,
                 Margin = new Padding(0),
-                Image = Image.FromFile(pathResources + theme + "\\settings.png"),
+                Image = Style.GetImage("settings", false),
                 SizeMode = PictureBoxSizeMode.Zoom
             };
             this.pictureBoxSettings.MouseEnter += PictureBoxesEnterEvent;
@@ -190,7 +205,7 @@ namespace Client.UserInterface
             {
                 Dock = DockStyle.Bottom,
 
-                BackColor = BackColorPanelLeft,
+                BackColor = Style.BackColorMain,
                 ForeColor = Color.White,
                 Font = new Font(Resources.FontName, 8F, FontStyle.Regular, GraphicsUnit.Point, 204),
                 TextAlign = ContentAlignment.MiddleLeft
@@ -201,8 +216,8 @@ namespace Client.UserInterface
             {
                 Dock = DockStyle.Bottom,
 
-                BackColor = BackColorPanelLeft,
-                ForeColor = Color.White,
+                BackColor = Style.BackColorMain,
+                ForeColor = Style.ForeColorMain,
                 Font = new Font(Resources.FontName, 8F, FontStyle.Regular, GraphicsUnit.Point, 204),
                 TextAlign = ContentAlignment.MiddleLeft
             };
@@ -223,7 +238,7 @@ namespace Client.UserInterface
             {
                 Location = new Point(0, 0),
                 Dock = DockStyle.Fill,
-                BackColor = BackColorPanelCenter,
+                BackColor = Style.BackColorSecondary,
                 Margin = new Padding(0),
                 BorderStyle = BorderStyle.FixedSingle
             };
@@ -239,7 +254,7 @@ namespace Client.UserInterface
                 BackColor = Color.FromArgb(36, 47, 61),
                 Text = "Search...",
                 Font = new Font(Resources.FontName, 11.8F, FontStyle.Regular, GraphicsUnit.Point, 204),
-                ForeColor = ForeColorTextBoxSearch,
+                ForeColor = Style.ForeColorSecondary,
                 BorderStyle = BorderStyle.FixedSingle,
                 //Multiline = true,
                 //AcceptsReturn = true,
@@ -261,7 +276,7 @@ namespace Client.UserInterface
                 MaximumSize = this.textBoxSearch.Size,
                 BackColor = Color.FromArgb(36, 47, 61),
                 Font = new Font(Resources.FontName, 13.8F, FontStyle.Regular, GraphicsUnit.Point, 204),
-                ForeColor = ForeColorTextBoxSearch,
+                ForeColor = Style.ForeColorSecondary,
                 BorderStyle = BorderStyle.FixedSingle,
                 TabStop = false,
                 Visible = false
@@ -290,7 +305,7 @@ namespace Client.UserInterface
                 Width = this.panelCenter.Width,
                 Height = 2000,
                 Margin = new Padding(0),
-                BackColor = BackColorPanelCenter
+                BackColor = Style.BackColorSecondary
             };
             this.panelCenter.Controls.Add(this.panelContactsBox);
         }
@@ -308,7 +323,7 @@ namespace Client.UserInterface
             {
                 Location = new Point(0, 0),
                 Dock = DockStyle.Fill,
-                BackColor = BackColorPanelRight,
+                BackColor = Style.BackColorMain,
                 BorderStyle = BorderStyle.FixedSingle,
                 Margin = new Padding(0)
             };
@@ -327,7 +342,7 @@ namespace Client.UserInterface
                 Location = new Point(0, 0),
                 Dock = DockStyle.Fill,
 
-                BackColor = BackColorPanelRight,
+                BackColor = Style.BackColorSecondary,
                 Margin = new Padding(0),
                 BorderStyle = BorderStyle.FixedSingle,
                 Visible = false
@@ -355,9 +370,9 @@ namespace Client.UserInterface
             {
                 Dock = DockStyle.Fill,
 
-                BackColor = BackColorPanelLeft,
+                BackColor = Style.BackColorMain,
                 Font = new Font(Resources.FontName, 12.8F, FontStyle.Regular, GraphicsUnit.Point, 204),
-                ForeColor = Color.White,
+                ForeColor = Style.ForeColorResidual,
                 Multiline = true,
                 BorderStyle = BorderStyle.FixedSingle,
                 ReadOnly = true,
@@ -379,7 +394,7 @@ namespace Client.UserInterface
             this.tableLayoutPanelEnter = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
-                BackColor = BackColorPanelCenter,
+                BackColor = Style.BackColorSecondary,
                 Margin = new Padding(0),
                 Visible = false
             };
@@ -403,9 +418,9 @@ namespace Client.UserInterface
             {
                 Dock = DockStyle.Fill,
 
-                BackColor = BackColorPanelCenter,
+                BackColor = Style.BackColorSecondary,
                 Font = new Font(Resources.FontName, 13.8F, FontStyle.Regular, GraphicsUnit.Point, 204),
-                ForeColor = Color.White,
+                ForeColor = Style.ForeColorResidual,
                 Multiline = true,
                 BorderStyle = BorderStyle.FixedSingle,
                 Margin = new Padding(0),
@@ -418,7 +433,7 @@ namespace Client.UserInterface
             {
                 Location = new Point(940, 430),
                 Size = new Size(55, 55),
-                BackColor = BackColorPanelCenter,
+                BackColor = Style.BackColorSecondary,
                 TabStop = false,
                 Margin = new Padding(0),
                 BorderStyle = BorderStyle.FixedSingle
@@ -430,11 +445,13 @@ namespace Client.UserInterface
                 Location = new Point(9, 9),
                 Size = new Size(35, 35),
 
-                BackColor = BackColorPanelCenter,
+                BackColor = Style.BackColorSecondary,
                 TabStop = false,
-                Image = Image.FromFile(pathResources + theme + "\\send.png"),
+                Image = Style.GetImage("send", false),
                 SizeMode = PictureBoxSizeMode.Zoom
             };
+            this.pictureBoxSend.MouseEnter += PictureBoxesEnterEvent;
+            this.pictureBoxSend.MouseLeave += PictureBoxesLeaveEvent;
             this.pictureBoxSend.Click += this.PictureBoxSendClickEvent;
             panelTemp.Controls.Add(this.pictureBoxSend);
         }
@@ -741,15 +758,19 @@ namespace Client.UserInterface
             PictureBox pictureBox = sender as PictureBox;
             if (pictureBox == this.pictureBoxProfile)
             {
-                pictureBox.Image = Image.FromFile(pathResources + theme + "\\profileIconDefault_entered.png");
+                pictureBox.Image = Style.GetImage("profile", true);
+            }
+            else if (pictureBox == this.pictureBoxChats)
+            {
+                pictureBox.Image = Style.GetImage("chats", true);
             }
             else if (pictureBox == this.pictureBoxSettings)
             {
-                pictureBox.Image = Image.FromFile(pathResources + theme + "\\settings_entered.png");
+                pictureBox.Image = Style.GetImage("settings", true);
             }
             else if (pictureBox == this.pictureBoxSend)
             {
-                pictureBox.Image = Image.FromFile(pathResources + theme + "\\send_entered.png");
+                pictureBox.Image = Style.GetImage("send", true);
             }
             
             this.ResumeLayout();
@@ -762,15 +783,19 @@ namespace Client.UserInterface
             PictureBox pictureBox = sender as PictureBox;
             if (pictureBox == this.pictureBoxProfile)
             {
-                pictureBox.Image = Image.FromFile(pathResources + theme + "\\profileIconDefault.png");
+                pictureBox.Image = Style.GetImage("profile", false);
+            }
+            else if (pictureBox == this.pictureBoxChats)
+            {
+                pictureBox.Image = Style.GetImage("chats", false);
             }
             else if (pictureBox == this.pictureBoxSettings)
             {
-                pictureBox.Image = Image.FromFile(pathResources + theme + "\\settings.png");
+                pictureBox.Image = Style.GetImage("settings", false);
             }
             else if (pictureBox == this.pictureBoxSend)
             {
-                pictureBox.Image = Image.FromFile(pathResources + theme + "\\send.png");
+                pictureBox.Image = Style.GetImage("send", false);
             }
 
             this.ResumeLayout();
@@ -831,7 +856,7 @@ namespace Client.UserInterface
             {
                 this.textBoxSearch.Text = "";
             }
-            this.textBoxSearch.ForeColor = ForeColorTextBoxSearchActive;
+            this.textBoxSearch.ForeColor = Style.ForeColorMain;
         }
 
         private void TextBoxSearchLostFocus(object sender, EventArgs e)
@@ -839,11 +864,11 @@ namespace Client.UserInterface
             if (this.textBoxSearch.Text == "")
             {
                 this.textBoxSearch.Text = "Search...";
-                this.textBoxSearch.ForeColor = ForeColorTextBoxSearch;
+                this.textBoxSearch.ForeColor = Style.ForeColorSecondary;
             }
             else if (this.textBoxSearch.Text == "Search...")
             {
-                this.textBoxSearch.ForeColor = ForeColorTextBoxSearch;
+                this.textBoxSearch.ForeColor = Style.ForeColorSecondary;
             }
         }
 

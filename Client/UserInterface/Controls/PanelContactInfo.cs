@@ -27,7 +27,7 @@ namespace Client.UserInterface.Controls
                 Text = this.id,
                 Font = new Font(Resources.FontName, 12.8F, FontStyle.Bold, GraphicsUnit.Point, 204),
                 TextAlign = ContentAlignment.MiddleCenter,
-                ForeColor = Color.White
+                ForeColor = ClientForm.Style.ForeColorResidual
             };
             this.Controls.Add(this.labelId);
         }
