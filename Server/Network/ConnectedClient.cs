@@ -102,6 +102,8 @@ namespace Server.Network
                         FilePackage filePackage => new FileMessage(this.Id, filePackage.IdAuthor, filePackage.Time,
                             filePackage.Content)
                     };
+                    // Тут нужен текст сообщения еще
+                    // Лучше в Imessage еще хранить chatId, и текст
                     this.server.dataBase.SetMessage(message);
 
                     //this.server.ServerDataBase.AddMessage(message);

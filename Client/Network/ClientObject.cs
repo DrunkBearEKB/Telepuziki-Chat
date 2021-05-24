@@ -32,10 +32,17 @@ namespace Client.Network
 
         public ClientObject(string id)
         {
-            this.Id = id;
-            this.packageCreator = new PackageCreator();
-            this.dataBase = new WrappedFirebase();
-            this.user = this.dataBase.GetUser(this.Id);
+            Id = id;
+            packageCreator = new PackageCreator();
+            dataBase = new WrappedFirebase();
+            var response = dataBase.GetUser(this.Id);
+            if (response == null)
+            {
+                user = new User(id, "123", id);
+                dataBase.SetUser(user);
+            }
+
+            user = response;
         }
         
         public async void Start()

@@ -5,6 +5,7 @@ using FireSharp;
 using FireSharp.Config;
 using FireSharp.Interfaces;
 using Network.Message;
+using Newtonsoft.Json;
 
 namespace Network.Database
 {
@@ -68,22 +69,39 @@ namespace Network.Database
         public User GetUser(string userId)
         {
             var response = client.Get("users/" + userId);
-            if (response == null) throw new ArgumentException("User not found");
-            var user = response.ResultAs<User>();
+            var user = response?.ResultAs<User>();
             return user;
+        }
+
+        public List<IUser> GetAllUsers()
+        {
+            var response= client.Get("users/");
+            if (response.Body == "null") return new List<IUser>();
+            var usersDict = JsonConvert.DeserializeObject<Dictionary<string, IUser>>(response.Body);
+            return usersDict.Values.ToList();
+        }
+
+        public List<IChat> GetAllChats()
+        {
+            var response= client.Get("chats/");
+            if (response.Body == "null") return new List<IChat>();
+            var usersDict = JsonConvert.DeserializeObject<Dictionary<string, IChat>>(response.Body);
+            return usersDict.Values.ToList();
         }
         
         public void SetUser(IUser user) => client.Set("users/" + user.Id, user); 
         public IChat GetChat(string chatId)
         {
             var response= client.Get("chats/" + chatId);
-            if (response == null) throw new ArgumentException("Chat not found");
-            var chat = response.ResultAs<IChat>();
+            var chat = response?.ResultAs<IChat>();
             return chat;
         }
 
         public void SetMessage(IMessage message)
         {
+            // В месседже текст
+            // var chatId = message.chatId;
+            // client.Set("chats/" + chatId, message);
             throw new NotImplementedException();
         }
         
