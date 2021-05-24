@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-
+using Client.Network.Database;
 using Network.Extensions;
 using Network.Message;
 using Network.Message.ExchangingMessages;
@@ -24,12 +24,16 @@ namespace Client.Network
         public bool AutoReconnect = true;
         public bool IsConnected { get; private set; }
         public string Id { get; private set; }
+        private IUser user;
         public bool IsHistoryReceived { get; private set; }
+        private WrappedFirebase dataBase;
 
         public ClientObject(string id)
         {
             this.Id = id;
             this.packageCreator = new PackageCreator();
+            this.dataBase = new WrappedFirebase();
+            this.user = new User(this.Id, "123", this.Id);
         }
         
         public async void Start()
@@ -60,7 +64,9 @@ namespace Client.Network
 
         public async Task RequestHistory(string id, DateTime timeUntil)
         {
-            await this.SendPackage(new HistoryRequestPackage("", this.Id, id, timeUntil));
+            string chatId = string.Compare(this.Id, id) == -1 ? $"{this.Id} {id}" : $"{id} {this.Id}";
+            //this.dataBase.GetChat(chatId).Messages
+            //await this.SendPackage(new HistoryRequestPackage("", this.Id, id, timeUntil));
         }
 
         private async Task SendPackage(IPackage package)

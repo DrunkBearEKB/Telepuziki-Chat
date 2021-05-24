@@ -20,12 +20,11 @@ namespace Client.Network.Database
         public string Password { get; }
         public string Id { get; }
         public List<IChat> Chats { get; } 
-        public User(string username, string password, string id, List<IChat> chats)
+        public User(string username, string password, string id)
         {
             Username = username;
             Password = password;
             Id = id;
-            Chats = chats;
         }
     }
 

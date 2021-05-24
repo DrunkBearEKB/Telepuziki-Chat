@@ -36,16 +36,6 @@ namespace Client.UserInterface.Controls
         {
             this.panelsMessages = new List<PanelMessage>();
 
-            /*this.scroll = new VScrollBar
-            {
-                Dock = DockStyle.Right,
-            };
-            this.scroll.Scroll += (sender, e) =>
-            {
-                this.VerticalScroll.Value = this.scroll.Value;
-            };
-            this.Controls.Add(this.scroll);*/
-            
             this.MouseEnter += this.OnMouseEnter;
                 
             foreach (IMessage message in this.messages)

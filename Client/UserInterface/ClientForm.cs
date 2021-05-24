@@ -518,8 +518,6 @@ namespace Client.UserInterface
 
         public async void ChangeChat(string idPrevious)
         {
-            this.SuspendLayout();
-
             this.textBoxTemp.Focus();
 
             if (!this.panelContactInfo.Visible)
@@ -585,8 +583,6 @@ namespace Client.UserInterface
             }
             
             this.panelContactInfo.ChangeContact(this.panelContactsBox.CurrentContact.Id);
-
-            this.ResumeLayout();
         }
 
         public void AddContactQuestion(string id)
