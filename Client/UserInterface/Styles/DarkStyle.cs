@@ -8,8 +8,8 @@ namespace Client.UserInterface.Styles
         public override Color BackColorSecondary => Color.FromArgb(23, 33, 43);
         public override Color BackColorEntered => Color.FromArgb(36, 47, 61);
         public override Color BackColorSelected => Color.FromArgb(43, 82, 120);
-        public override Color ForeColorMain => Color.DarkGray;
-        public override Color ForeColorSecondary => Color.White;
+        public override Color ForeColorMain => Color.White;
+        public override Color ForeColorSecondary => Color.DarkGray;
         public override Color ForeColorResidual => Color.White;
         public override string pathImages => "themeDark";
 

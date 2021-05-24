@@ -33,6 +33,7 @@ namespace Client.UserInterface
         private Label labelRam;
         
         private Panel panelCenter;
+        private PictureBox pictureBoxSearch;
         private TextBox textBoxSearch;
         private Label labelSearchQuestion;
         private PanelContactsBox panelContactsBox;
@@ -41,8 +42,7 @@ namespace Client.UserInterface
 
         private TableLayoutPanel tableLayoutPanelRight;
         private PanelContactInfo panelContactInfo;
-        private Panel panelTextBoxChat;
-        private TextBox textBoxChat;
+        private PanelChatBox panelChatBox;
         private TableLayoutPanel tableLayoutPanelEnter;
         private TextBox textBoxEnter;
         private PictureBox pictureBoxSend;
@@ -55,7 +55,6 @@ namespace Client.UserInterface
         private System.Timers.Timer timerTemp;
 
         private static string pathResources = "..\\..\\..\\Resources\\";
-        private static string theme = "themeDark";
 
         private readonly ClientObject client;
         private readonly Dictionary<string, List<IMessage>> dictMessageHistory;
@@ -68,7 +67,7 @@ namespace Client.UserInterface
             this.dictMessagesNotSent = new Dictionary<string, List<IMessage>>();
             this.dictMessageNotFinished = new Dictionary<string, string>();
 
-            Style = new BlackPinkStyle("..\\..\\..\\Resources\\");
+            Style = new DarkStyle(pathResources);
 
             this.cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
             this.ramCounter = new PerformanceCounter("Memory", "Available MBytes");
@@ -147,8 +146,8 @@ namespace Client.UserInterface
                 Location = new Point(0, 0),
                 Dock = DockStyle.Fill,
                 BackColor = Style.BackColorMain,
-                Margin = new Padding(0),
-                BorderStyle = BorderStyle.FixedSingle
+                Margin = new Padding(1),
+                //BorderStyle = BorderStyle.FixedSingle
             };
             this.tableLayoutPanel.Controls.Add(this.panelLeft, 0, 0);
 
@@ -239,17 +238,32 @@ namespace Client.UserInterface
                 Location = new Point(0, 0),
                 Dock = DockStyle.Fill,
                 BackColor = Style.BackColorSecondary,
-                Margin = new Padding(0),
-                BorderStyle = BorderStyle.FixedSingle
+                Margin = new Padding(1),
+                //BorderStyle = BorderStyle.FixedSingle
             };
             this.tableLayoutPanel.Controls.Add(this.panelCenter, 1, 0);
+
+            this.pictureBoxSearch = new PictureBox
+            {
+                Location = new Point(10, 18),
+                Size = new Size(25, 25),
+
+                BackColor = Style.BackColorSecondary,
+                TabStop = false,
+                Image = Style.GetImage("search", false),
+                SizeMode = PictureBoxSizeMode.Zoom
+            };
+            this.pictureBoxSearch.MouseEnter += PictureBoxesEnterEvent;
+            this.pictureBoxSearch.MouseLeave += PictureBoxesLeaveEvent;
+            //this.pictureBoxSearch.Click += this.PictureBoxSearchClickEvent;
+            this.panelCenter.Controls.Add(pictureBoxSearch);
 
             // textBoxSearch
             this.textBoxSearch = new TextBox()
             {
-                Location = new Point(15, 15),
+                Location = new Point(45, 15),
                 Anchor = AnchorStyles.Right | AnchorStyles.Top,
-                Size = new Size((int)this.tableLayoutPanel.ColumnStyles[1].Width - 30, 76 - 30),
+                Size = new Size((int)this.tableLayoutPanel.ColumnStyles[1].Width - 30 - 25, 76 - 30),
 
                 BackColor = Color.FromArgb(36, 47, 61),
                 Text = "Search...",
@@ -291,7 +305,11 @@ namespace Client.UserInterface
                 new Contact("test1"),
                 new Contact("test2"),
                 new Contact("test3"),
-                new Contact("test4")
+                new Contact("test4"),
+                new Contact("test5"),
+                new Contact("test6"),
+                new Contact("test7"), 
+                new Contact("test8")
             };
 
             foreach (var c in contacts)
@@ -305,7 +323,8 @@ namespace Client.UserInterface
                 Width = this.panelCenter.Width,
                 Height = 2000,
                 Margin = new Padding(0),
-                BackColor = Style.BackColorSecondary
+                BackColor = Style.BackColorSecondary,
+                AutoScroll = true
             };
             this.panelCenter.Controls.Add(this.panelContactsBox);
         }
@@ -324,8 +343,8 @@ namespace Client.UserInterface
                 Location = new Point(0, 0),
                 Dock = DockStyle.Fill,
                 BackColor = Style.BackColorMain,
-                BorderStyle = BorderStyle.FixedSingle,
-                Margin = new Padding(0)
+                //BorderStyle = BorderStyle.FixedSingle,
+                Margin = new Padding(1)
             };
             this.tableLayoutPanel.Controls.Add(this.tableLayoutPanelRight, 2, 0);
 
@@ -344,7 +363,7 @@ namespace Client.UserInterface
 
                 BackColor = Style.BackColorSecondary,
                 Margin = new Padding(0),
-                BorderStyle = BorderStyle.FixedSingle,
+                //BorderStyle = BorderStyle.FixedSingle,
                 Visible = false
             };
             this.tableLayoutPanelRight.Controls.Add(this.panelContactInfo, 0, 0);
@@ -356,33 +375,16 @@ namespace Client.UserInterface
                     Height = 50
                 });
 
-            this.panelTextBoxChat = new Panel
+            this.panelChatBox = new PanelChatBox
             {
                 Dock = DockStyle.Fill,
+                BorderStyle = BorderStyle.None,
                 Margin = new Padding(0),
-                BorderStyle = BorderStyle.FixedSingle,
-                Visible = false
-            };
-            this.tableLayoutPanelRight.Controls.Add(this.panelTextBoxChat, 0, 1);
-
-            // textBoxChat 
-            this.textBoxChat = new TextBox
-            {
-                Dock = DockStyle.Fill,
-
-                BackColor = Style.BackColorMain,
-                Font = new Font(Resources.FontName, 12.8F, FontStyle.Regular, GraphicsUnit.Point, 204),
-                ForeColor = Style.ForeColorResidual,
-                Multiline = true,
-                BorderStyle = BorderStyle.FixedSingle,
-                ReadOnly = true,
-                ScrollBars = ScrollBars.Vertical,
-                AcceptsReturn = true,
-                Margin = new Padding(0),
+                TabStop = false,
                 Visible = false,
-                TabStop = false
+                AutoScroll = true
             };
-            panelTextBoxChat.Controls.Add(this.textBoxChat);
+            this.tableLayoutPanelRight.Controls.Add(this.panelChatBox, 0, 1);
 
             this.tableLayoutPanelRight.RowStyles.Add(
                 new RowStyle
@@ -422,9 +424,10 @@ namespace Client.UserInterface
                 Font = new Font(Resources.FontName, 13.8F, FontStyle.Regular, GraphicsUnit.Point, 204),
                 ForeColor = Style.ForeColorResidual,
                 Multiline = true,
-                BorderStyle = BorderStyle.FixedSingle,
+                BorderStyle = BorderStyle.None,
                 Margin = new Padding(0),
-                TabStop = false
+                TabStop = false,
+                ScrollBars = ScrollBars.Vertical
             };
             this.textBoxEnter.KeyDown += this.TextBoxEnterKeyDownEvent;
             this.tableLayoutPanelEnter.Controls.Add(this.textBoxEnter, 0, 0);
@@ -436,14 +439,14 @@ namespace Client.UserInterface
                 BackColor = Style.BackColorSecondary,
                 TabStop = false,
                 Margin = new Padding(0),
-                BorderStyle = BorderStyle.FixedSingle
+                //BorderStyle = BorderStyle.FixedSingle
             };
             this.tableLayoutPanelEnter.Controls.Add(panelTemp, 1, 0);
             
             this.pictureBoxSend = new PictureBox
             {
-                Location = new Point(9, 9),
-                Size = new Size(35, 35),
+                Location = new Point(15, 15),
+                Size = new Size(23, 23),
 
                 BackColor = Style.BackColorSecondary,
                 TabStop = false,
@@ -501,8 +504,7 @@ namespace Client.UserInterface
 
                     if (idSender == this.panelContactsBox.CurrentContact.Id)
                     {
-                        this.textBoxChat.AppendText($"{textMessage.IdAuthor}: {textMessage.Content}     " +
-                                                    $"[{textMessage.Time}]" + Environment.NewLine);
+                        this.panelChatBox.AddMessage(textMessage);
                     }
                     break;
                 case FileMessage:
@@ -522,13 +524,12 @@ namespace Client.UserInterface
 
             if (!this.panelContactInfo.Visible)
             {
-                this.panelTextBoxChat.Visible = true;
-                this.textBoxChat.Visible = true;
+                this.panelChatBox.Visible = true;
                 this.panelContactInfo.Visible = true;
                 this.tableLayoutPanelEnter.Visible = true;
             }
 
-            this.textBoxChat.Clear();
+            this.panelChatBox.Clear();
             this.textBoxEnter.Clear();
 
             if (!this.panelContactsBox.CurrentContact.HistoryReceived)
@@ -550,31 +551,32 @@ namespace Client.UserInterface
 
             Thread.Sleep(100);
             this.panelContactsBox.CurrentContact.HistoryReceived = true;
-            this.textBoxChat.SuspendLayout();
+            //this.panelChatBox.Visible = false;
             while (true)
             {
                 try
                 {
-                    var builder = new StringBuilder();
                     foreach (var m in this.dictMessageHistory[this.panelContactsBox.CurrentContact.Id])
                     {
+                        this.panelChatBox.SuspendLayout();
                         switch (m)
                         {
                             case TextMessage textMessage:
-                                builder.Append($"{textMessage.IdAuthor}: {textMessage.Content}     " +
-                                               $"[{m.Time}]{Environment.NewLine}");
+                                this.panelChatBox.AddMessage(textMessage);
                                 break;
+                            
                         }
+                        this.panelChatBox.ResumeLayout();
                     }
-                    this.textBoxChat.AppendText(builder.ToString());
+                    
                     break;
                 }
                 catch
                 {
-                    this.textBoxChat.Clear();
+                    this.panelChatBox.Clear();
                 }
             }
-            this.textBoxChat.ResumeLayout();
+            //this.panelChatBox.Visible = true;
             
             if (this.dictMessageNotFinished.ContainsKey(this.panelContactsBox.CurrentContact.Id))
             {
@@ -768,6 +770,10 @@ namespace Client.UserInterface
             {
                 pictureBox.Image = Style.GetImage("settings", true);
             }
+            else if (pictureBox == this.pictureBoxSearch)
+            {
+                pictureBox.Image = Style.GetImage("search", true);
+            }
             else if (pictureBox == this.pictureBoxSend)
             {
                 pictureBox.Image = Style.GetImage("send", true);
@@ -793,6 +799,10 @@ namespace Client.UserInterface
             {
                 pictureBox.Image = Style.GetImage("settings", false);
             }
+            else if (pictureBox == this.pictureBoxSearch)
+            {
+                pictureBox.Image = Style.GetImage("search", false);
+            }
             else if (pictureBox == this.pictureBoxSend)
             {
                 pictureBox.Image = Style.GetImage("send", false);
@@ -806,29 +816,54 @@ namespace Client.UserInterface
             this.SuspendLayout();
 
             var content = this.textBoxEnter.Text;
+            this.textBoxEnter.Clear();
+            
+            while (content.StartsWith(Environment.NewLine))
+            {
+                content = content.Substring(Environment.NewLine.Length, content.Length - Environment.NewLine.Length);
+            }
+            while (content.EndsWith(Environment.NewLine))
+            {
+                content = content.Substring(0, content.Length - Environment.NewLine.Length);
+            }
+            
             if (content.Length != 0)
             {
-                IMessage message = new TextMessage(this.panelContactsBox.CurrentContact.Id, this.client.Id, DateTime.Now, content);
+                int maxSize = 1024;
+                for (int i = 0; i < content.Length / maxSize + 1; i++)
+                {
+                    int indexEnd = i != content.Length / maxSize ? (i + 1) * maxSize : content.Length;
+                    string cont = content.Substring(i * maxSize, indexEnd - i * maxSize);
 
-                try
-                {
-                    await this.client.SendText(message.IdReceiver, content);
-                }
-                catch
-                {
-                    if (!this.dictMessagesNotSent.ContainsKey(this.panelContactsBox.CurrentContact.Id))
+                    if (cont.Length == 0)
                     {
-                        this.dictMessagesNotSent.Add(
-                            this.panelContactsBox.CurrentContact.Id, new List<IMessage>());
+                        break;
                     }
-                    this.dictMessagesNotSent[this.panelContactsBox.CurrentContact.Id].Add(message);
+                    
+                    IMessage message = new TextMessage(this.panelContactsBox.CurrentContact.Id, this.client.Id, DateTime.Now, cont);
+
+                    try
+                    {
+                        await this.client.SendText(message.IdReceiver, cont);
+                    }
+                    catch
+                    {
+                        if (!this.dictMessagesNotSent.ContainsKey(this.panelContactsBox.CurrentContact.Id))
+                        {
+                            this.dictMessagesNotSent.Add(
+                                this.panelContactsBox.CurrentContact.Id, new List<IMessage>());
+                        }
+                        this.dictMessagesNotSent[this.panelContactsBox.CurrentContact.Id].Add(message);
+                    }
+
+                    this.SuspendLayout();
+                    this.panelChatBox.AddMessage(message);
+                    this.ResumeLayout();
+                    
+                    this.dictMessageHistory[this.panelContactsBox.CurrentContact.Id].Add(message);
+                    this.panelContactsBox.SetLastMessage(this.panelContactsBox.CurrentContact.Id, this.client.Id, content);
                 }
-
-                this.textBoxChat.AppendText($"{this.client.Id}: {content} [{DateTime.Now}]{Environment.NewLine}");
-                this.dictMessageHistory[this.panelContactsBox.CurrentContact.Id].Add(message);
-                this.textBoxEnter.Clear();
-                this.panelContactsBox.SetLastMessage(this.panelContactsBox.CurrentContact.Id, this.client.Id, content);
-
+                
                 this.panelContactsBox.SetFirst(this.panelContactsBox.CurrentContact);
             }
             
@@ -900,8 +935,7 @@ namespace Client.UserInterface
             }
             else if (e.KeyCode == Keys.Escape)
             {
-                this.panelTextBoxChat.Visible = false;
-                this.textBoxChat.Visible = false;
+                this.panelChatBox.Visible = false;
                 this.panelContactInfo.Visible = false;
                 this.tableLayoutPanelEnter.Visible = false;
                 this.panelContactsBox.RemoveSelection();
@@ -912,19 +946,12 @@ namespace Client.UserInterface
         {
             if (e.Shift && e.KeyCode == Keys.Return)
             {
-                this.textBoxEnter.AppendText(Environment.NewLine);
+
             }
             else if (e.KeyCode == Keys.Return)
             {
-                if (this.textBoxEnter.Text.Length != 0)
-                {
-                    if (this.textBoxEnter.Text[^1].Equals('\n'))
-                    {
-                        this.textBoxEnter.Text = this.textBoxEnter.Text.Substring(0, this.textBoxEnter.Text.Length - 1);
-                    }
-                }
                 this.PictureBoxSendClickEvent(this.pictureBoxSend, null);
-                
+                this.textBoxEnter.Clear();
             }
         }
 
