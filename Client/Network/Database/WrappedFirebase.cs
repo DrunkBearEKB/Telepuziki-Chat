@@ -11,7 +11,7 @@ namespace Client.Network.Database
     public abstract class IUser
     {
         public string Username { get; }
-        
+        public string Id { get; }
     }
 
     public class User : IUser
@@ -64,7 +64,16 @@ namespace Client.Network.Database
         {
             client.Set("chats/" + chat.Id, chat);
         }
+
+        public IUser GetUser(string userId)
+        {
+            var response = client.Get("users/" + userId);
+            if (response == null) throw new ArgumentException("User not found");
+            var user = response.ResultAs<IUser>();
+            return user;
+        }
         
+        public void SetUser(IUser user) => client.Set("users/" + user.Id, user); 
         public IChat GetChat(string chatId)
         {
             var response= client.Get("chats/" + chatId);
