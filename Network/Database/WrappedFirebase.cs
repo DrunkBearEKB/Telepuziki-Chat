@@ -6,7 +6,7 @@ using FireSharp.Config;
 using FireSharp.Interfaces;
 using Network.Message;
 
-namespace Client.Network.Database
+namespace Network.Database
 {
     public abstract class IUser
     {
@@ -65,11 +65,11 @@ namespace Client.Network.Database
             client.Set("chats/" + chat.Id, chat);
         }
 
-        public IUser GetUser(string userId)
+        public User GetUser(string userId)
         {
             var response = client.Get("users/" + userId);
             if (response == null) throw new ArgumentException("User not found");
-            var user = response.ResultAs<IUser>();
+            var user = response.ResultAs<User>();
             return user;
         }
         
@@ -81,6 +81,12 @@ namespace Client.Network.Database
             var chat = response.ResultAs<IChat>();
             return chat;
         }
+
+        public void SetMessage(IMessage message)
+        {
+            throw new NotImplementedException();
+        }
+        
         public WrappedFirebase()
         {
             IFirebaseConfig config = new FirebaseConfig

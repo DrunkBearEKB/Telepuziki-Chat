@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Timers;
+using Network.Database;
 using Timer = System.Timers.Timer;
 
 using Network.Package;
@@ -17,8 +18,8 @@ namespace Server.Network
         private readonly Dictionary<string, ConnectedClient> dictionaryConnectedClients;
         private readonly int port = 9090;
         private readonly PackageCreator packageCreator;
-        
-        public IServerDataBase ServerDataBase { get; private set; }
+
+        public readonly WrappedFirebase dataBase;
 
         private Timer timerOnlineChecking;
         private const int AmountSecondsBetweenOnlineChecking = 5;
@@ -28,6 +29,7 @@ namespace Server.Network
             this.listener = new TcpListener(IPAddress.Any, port);
             this.dictionaryConnectedClients = new Dictionary<string, ConnectedClient>();
             this.packageCreator = new PackageCreator();
+            this.dataBase = new WrappedFirebase();
             
             this.LoadMessageHistory();
         }
@@ -59,6 +61,9 @@ namespace Server.Network
                     TcpClient client = await this.listener.AcceptTcpClientAsync();
                     await this.ReceivePackageAfterConnection(client);
                     IPackage package = this.packageCreator.GetPackage();
+                    
+                    // Проверка на already exist
+                    this.dataBase.SetUser(new User(package.IdAuthor, "123", package.IdAuthor));
 
                     if (!this.dictionaryConnectedClients.ContainsKey(package.IdAuthor))
                     {
@@ -110,10 +115,10 @@ namespace Server.Network
             this.dictionaryConnectedClients.Add(connectedClient.Id, connectedClient);
             this.OnClientConnected?.Invoke(connectedClient.Id);
 
-            if (!this.ServerDataBase.ContainsClient(connectedClient.Id))
+            /*if (!this.ServerDataBase.ContainsClient(connectedClient.Id))
             {
                 this.ServerDataBase.AddClient(connectedClient.Id);
-            }
+            }*/
                         
             await connectedClient.StartListen();
         }
@@ -133,7 +138,7 @@ namespace Server.Network
 
         private void LoadMessageHistory()
         {
-            this.ServerDataBase = new ServerDataBaseTemp();
+            //this.ServerDataBase = new ServerDataBaseTemp();
         }
 
         public async Task SendPackage(IPackage package)

@@ -87,6 +87,7 @@ namespace Server.Network
             
             if (package.IdReceiver != "")
             {
+
                 await this.server.SendPackage(package);
 
                 if (package.Type == PackageType.Text || package.Type == PackageType.Voice ||
@@ -101,8 +102,9 @@ namespace Server.Network
                         FilePackage filePackage => new FileMessage(this.Id, filePackage.IdAuthor, filePackage.Time,
                             filePackage.Content)
                     };
+                    this.server.dataBase.SetMessage(message);
 
-                    this.server.ServerDataBase.AddMessage(message);
+                    //this.server.ServerDataBase.AddMessage(message);
                 }
                 
                 this.OnGetPackage?.Invoke(package);
@@ -116,7 +118,7 @@ namespace Server.Network
                         await this.Disconnect();
                         break;
                 
-                    case HistoryRequestPackage historyRequestPackage:
+                    /*case HistoryRequestPackage historyRequestPackage:
                         List<IMessage> messages = this.server.ServerDataBase.GetMessages(
                             this.Id, historyRequestPackage.IdRequest, historyRequestPackage.TimeUntil);
                         HistoryAnswerPackage packageAnswer1 = new HistoryAnswerPackage(this.Id,"", 
@@ -132,14 +134,14 @@ namespace Server.Network
                                 return result;
                             }).ToList());
                         await this.server.SendPackage(packageAnswer1);
-                        break;
+                        break;*/
                     
-                    case UsersListRequestPackage usersListRequestPackage:
+                    /*case UsersListRequestPackage usersListRequestPackage:
                         List<string> users = this.server.ServerDataBase
                             .GetUsersWithSimilarId(usersListRequestPackage.IdRequest);
                         UsersListAnswerPackage packageAnswer2 = new UsersListAnswerPackage(this.Id, "", users);
                         await this.server.SendPackage(packageAnswer2);
-                        break;
+                        break;*/
                 }
             }
         }
