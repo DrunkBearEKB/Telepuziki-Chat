@@ -4,7 +4,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Timers;
-using Network.Database;
+using DataBase;
+using DataBase.User;
 using Timer = System.Timers.Timer;
 
 using Network.Package;

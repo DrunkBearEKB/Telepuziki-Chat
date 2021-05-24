@@ -4,13 +4,16 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using Network.Database;
+using DataBase;
+using DataBase.User;
+using Microsoft.VisualBasic.ApplicationServices;
 using Network.Extensions;
 using Network.Message;
 using Network.Message.ExchangingMessages;
 using Network.Package;
 using Network.Package.ExchangingPackages;
 using NUnit.Framework;
+using User = DataBase.User.User;
 
 namespace Client.Network
 {
@@ -25,7 +28,7 @@ namespace Client.Network
 
         public bool AutoReconnect = true;
         public bool IsConnected { get; private set; }
-        public string Id { get; private set; }
+        public string Id { get; }
         private User user;
         public bool IsHistoryReceived { get; private set; }
         private WrappedFirebase dataBase;
@@ -34,6 +37,7 @@ namespace Client.Network
         {
             Id = id;
             packageCreator = new PackageCreator();
+            
             dataBase = new WrappedFirebase();
             var response = dataBase.GetUser(this.Id);
             if (response == null)
@@ -41,7 +45,6 @@ namespace Client.Network
                 user = new User(id, "123", id);
                 dataBase.SetUser(user);
             }
-
             user = response;
         }
         
@@ -71,19 +74,21 @@ namespace Client.Network
             await this.SendPackage(new UsersListRequestPackage("", this.Id, idRequest));
         }
 
-        public async Task RequestHistory(string id, DateTime timeUntil)
+        public void RequestHistory(string id)
         {
-            string chatId = string.Compare(this.Id, id) == -1 ? $"{this.Id} {id}" : $"{id} {this.Id}";
-
             foreach (var chat in this.user.Chats)
             {
-                if (chat.Members.Select(user => user.Id).Contains(id))
+                if (chat.Members.Select(u => u.Id).Contains(id))
                 {
-                    //return chat.Messages
+                    foreach (var m in chat.Messages)
+                    {
+                        Console.WriteLine((m as TextMessage).Content);
+                    }
+                    
+                    this.OnHistoryReceive?.Invoke(id, chat.Messages);
+                    return;
                 }
             }
-            
-            //await this.SendPackage(new HistoryRequestPackage("", this.Id, id, timeUntil));
         }
 
         private async Task SendPackage(IPackage package)

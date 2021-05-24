@@ -302,10 +302,10 @@ namespace Client.UserInterface
             //PanelContactsBox
             var contacts = new List<Contact>
             {
-                new Contact("test1"),
-                new Contact("test2"),
-                new Contact("test3"),
-                new Contact("test4"),
+                new Contact("artem"),
+                new Contact("grisha"),
+                new Contact("julia"),
+                new Contact("vova"),
                 new Contact("test5"),
                 new Contact("test6"),
                 new Contact("test7"), 
@@ -530,11 +530,13 @@ namespace Client.UserInterface
             this.panelChatBox.Clear();
             this.textBoxEnter.Clear();
 
+            Console.WriteLine(this.panelContactsBox.CurrentContact.HistoryReceived);
             if (!this.panelContactsBox.CurrentContact.HistoryReceived)
             {
                 try
                 {
-                    await this.client.RequestHistory(this.panelContactsBox.CurrentContact.Id, DateTime.MinValue);
+                    Console.WriteLine("Request");
+                    this.client.RequestHistory(this.panelContactsBox.CurrentContact.Id);
                 }
                 catch
                 {
@@ -726,8 +728,8 @@ namespace Client.UserInterface
                 if (!contact.HistoryReceived)
                 {
                     //this.client.SendMessage("", $"history {contact.Id}");
-                    contact.HistoryReceived = true;
-                    return;
+                    //contact.HistoryReceived = true;
+                    //return;
                 }
             }
 

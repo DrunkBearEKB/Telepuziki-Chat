@@ -1,62 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DataBase.Chat;
+using DataBase.User;
 using FireSharp;
 using FireSharp.Config;
 using FireSharp.Interfaces;
 using Network.Message;
 using Newtonsoft.Json;
 
-namespace Network.Database
+namespace DataBase
 {
-    public abstract class IUser
-    {
-        public string Username { get; }
-        public string Id { get; }
-    }
-
-    public class User : IUser
-    {
-        public string Username { get; }
-        public string Password { get; }
-        public string Id { get; }
-        public List<IChat> Chats { get; } 
-        public User(string username, string password, string id)
-        {
-            Username = username;
-            Password = password;
-            Id = id;
-        }
-    }
-
-    public abstract class IChat
-    {
-        public List<IMessage> Messages { get;}
-        public void AddMessage(IMessage message) => Messages.Add(message);
-        public void AddMember(IUser user) => Members.Add(user);
-        public List<IUser> Members { get; }
-        public int Id { get; }
-    }
-
-    public class Chat : IChat
-    {
-        public string Id { get; }
-        public string ChatTitle { get; }
-        public List<IUser> Members;
-        public List<IMessage> Messages;
-        public Chat(string id, string chatTitle, List<IUser> members)
-        {
-            Id = id;
-            ChatTitle = chatTitle;
-            Members = members;
-        }
-
-        public List<IMessage> GetAllMessages()
-        {
-            return Messages;
-            // Messages.Select(m => m.Text)
-        }
-    }
+   
     public class WrappedFirebase
     {
         private IFirebaseClient client { get; }
@@ -66,10 +21,10 @@ namespace Network.Database
             client.Set("chats/" + chat.Id, chat);
         }
 
-        public User GetUser(string userId)
+        public User.User GetUser(string userId)
         {
             var response = client.Get("users/" + userId);
-            var user = response?.ResultAs<User>();
+            var user = response?.ResultAs<User.User>();
             return user;
         }
 
@@ -107,14 +62,5 @@ namespace Network.Database
             };
             client = new FirebaseClient(config);
         }
-    }
-    public class ClientDataBase
-    {
-        private WrappedFirebase db { get; }
-        public ClientDataBase()
-        {
-            db = new WrappedFirebase();
-        }
-        public List<IMessage> GetMessages(string id) => db.GetChat(id).Messages;
     }
 }
