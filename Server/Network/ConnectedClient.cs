@@ -104,7 +104,10 @@ namespace Server.Network
                     };
                     // Тут нужен текст сообщения еще
                     // Лучше в Imessage еще хранить chatId, и текст
-                    this.server.dataBase.SetMessage(message);
+                    var chatId = string.Compare(this.Id, message.IdAuthor) == -1 ?
+                        $"{Id} {message.IdAuthor}" :
+                        $"{message.IdAuthor} {Id}";
+                    server.dataBase.SetMessage(message, chatId);
 
                     //this.server.ServerDataBase.AddMessage(message);
                 }

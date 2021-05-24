@@ -97,14 +97,7 @@ namespace Network.Database
             return chat;
         }
 
-        public void SetMessage(IMessage message)
-        {
-            // В месседже текст
-            // var chatId = message.chatId;
-            // client.Set("chats/" + chatId, message);
-            throw new NotImplementedException();
-        }
-        
+        public void SetMessage(IMessage message, string chatId) => client.Set("chats/" + chatId, message);
         public WrappedFirebase()
         {
             IFirebaseConfig config = new FirebaseConfig
