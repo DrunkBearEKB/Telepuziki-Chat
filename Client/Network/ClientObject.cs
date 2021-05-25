@@ -31,21 +31,21 @@ namespace Client.Network
         public string Id { get; }
         private User user;
         public bool IsHistoryReceived { get; private set; }
-        //private WrappedFirebase dataBase;
+        private WrappedFirebase dataBase;
 
         public ClientObject(string id)
         {
             Id = id;
             packageCreator = new PackageCreator();
             
-            /*dataBase = new WrappedFirebase();
+            dataBase = new WrappedFirebase();
             var response = dataBase.GetUser(this.Id);
             if (response == null)
             {
                 user = new User(id, "123", id);
                 dataBase.SetUser(user);
             }
-            user = response;*/
+            user = response;
         }
         
         public async void Start()
@@ -93,6 +93,11 @@ namespace Client.Network
 
         private async Task SendPackage(IPackage package)
         {
+            if (package.IdAuthor == package.IdReceiver)
+            {
+                return;
+            }
+            
             try
             {
                 await this.stream.WriteAsync(package);

@@ -4,6 +4,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Timers;
+using DataBase;
+using DataBase.User;
 using Timer = System.Timers.Timer;
 
 using Network.Package;
@@ -18,7 +20,7 @@ namespace Server.Network
         private readonly int port = 9090;
         private readonly PackageCreator packageCreator;
 
-        //public readonly WrappedFirebase dataBase;
+        public readonly WrappedFirebase dataBase;
 
         private Timer timerOnlineChecking;
         private const int AmountSecondsBetweenOnlineChecking = 5;
@@ -28,7 +30,7 @@ namespace Server.Network
             this.listener = new TcpListener(IPAddress.Any, port);
             this.dictionaryConnectedClients = new Dictionary<string, ConnectedClient>();
             this.packageCreator = new PackageCreator();
-            //this.dataBase = new WrappedFirebase();
+            this.dataBase = new WrappedFirebase();
             
             //this.LoadMessageHistory();
         }
@@ -57,14 +59,12 @@ namespace Server.Network
             {
                 try
                 {
-                    Console.WriteLine("+++");
                     TcpClient client = await this.listener.AcceptTcpClientAsync();
-                    Console.WriteLine(123);
                     await this.ReceivePackageAfterConnection(client);
                     IPackage package = this.packageCreator.GetPackage();
                     
                     // Проверка на already exist
-                    //this.dataBase.SetUser(new User(package.IdAuthor, "123", package.IdAuthor));
+                    this.dataBase.SetUser(new User(package.IdAuthor, "123", package.IdAuthor));
 
                     if (!this.dictionaryConnectedClients.ContainsKey(package.IdAuthor))
                     {
@@ -93,7 +93,6 @@ namespace Server.Network
                 {
                     int amountBytesRead = await client.GetStream().ReadAsync(bytes, 0, bytes.Length);
                     packageCreator.Add(bytes, amountBytesRead);
-                    Console.WriteLine(amountBytesRead);
                 }
                 catch (SocketException)
                 {
@@ -104,7 +103,6 @@ namespace Server.Network
 
         private async Task HandleNotConnectedClient(IPackage package, TcpClient client)
         {
-            Console.WriteLine(456);
             ConnectedClient connectedClient = new ConnectedClient(package.IdAuthor, client.GetStream(), this);
             connectedClient.OnGetPackage += packageReceived =>
                 this.OnGetData?.Invoke(packageReceived);
@@ -122,10 +120,8 @@ namespace Server.Network
             {
                 this.ServerDataBase.AddClient(connectedClient.Id);
             }*/
-            Console.WriteLine(789);       
             await Task.Run(() => connectedClient.StartListen());
             //await ;
-            Console.WriteLine(101112);  
         }
 
         private async Task HandleAlreadyConnectedClient(IPackage package, TcpClient client)

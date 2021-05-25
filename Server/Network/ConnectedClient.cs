@@ -38,7 +38,14 @@ namespace Server.Network
         
         public async Task SendPackage(IPackage package)
         {
-            await this.stream.WriteAsync(package);
+            try
+            {
+                await this.stream.WriteAsync(package);
+            }
+            catch (ObjectDisposedException e)
+            {
+                this.OnDisconnected?.Invoke();
+            }
         }
 
         public async void StartListen()
@@ -47,7 +54,6 @@ namespace Server.Network
             {
                 try
                 {
-                    Console.WriteLine(909090);
                     IPackage package = await this.ReceivePackage();
                     await this.HandleReceivedPackage(package);
                 }
@@ -104,10 +110,10 @@ namespace Server.Network
                     };
                     // Тут нужен текст сообщения еще
                     // Лучше в Imessage еще хранить chatId, и текст
-                    /*var chatId = string.Compare(this.Id, message.IdAuthor) == -1 ?
+                    var chatId = string.Compare(this.Id, message.IdAuthor) == -1 ?
                         $"{Id} {message.IdAuthor}" :
                         $"{message.IdAuthor} {Id}";
-                    server.dataBase.SetMessage(message, chatId);*/
+                    server.dataBase.SetMessage(message, chatId);
 
                     //this.server.ServerDataBase.AddMessage(message);
                 }

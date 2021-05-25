@@ -528,8 +528,7 @@ namespace Client.UserInterface
 
             this.panelChatBox.Clear();
             this.textBoxEnter.Clear();
-
-            Console.WriteLine(this.panelContactsBox.CurrentContact.HistoryReceived);
+            
             if (!this.panelContactsBox.CurrentContact.HistoryReceived)
             {
                 try
@@ -555,7 +554,6 @@ namespace Client.UserInterface
             {
                 try
                 {
-                    Console.WriteLine($"temp={this.panelContactsBox.CurrentContact.Id}");
                     foreach (var m in this.dictMessageHistory[this.panelContactsBox.CurrentContact.Id])
                     {
                         this.panelChatBox.SuspendLayout();
@@ -868,10 +866,8 @@ namespace Client.UserInterface
 
         private async void TextBoxSearchTextChanged(object sender, KeyEventArgs e)
         {
-            Console.WriteLine(this.textBoxSearch.Text);
             if (e.KeyCode == Keys.Return)
             {
-                Console.WriteLine(123);
                 //this.textBoxSearch.Text = this.textBoxSearch.Text.Substring(0, this.textBoxSearch.Text.Length - 1);
                 //await this.client.SendSearchRequest(this.textBoxSearch.Text);
                 
