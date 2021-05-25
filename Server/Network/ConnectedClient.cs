@@ -42,8 +42,9 @@ namespace Server.Network
             {
                 await this.stream.WriteAsync(package);
             }
-            catch (ObjectDisposedException e)
+            catch (ObjectDisposedException)
             {
+                await this.server.Disconnect(this.Id);
                 this.OnDisconnected?.Invoke();
             }
         }
