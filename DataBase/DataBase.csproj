@@ -8,4 +8,8 @@
       <ProjectReference Include="..\Network\Network.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="FireSharp" Version="2.0.4" />
+    </ItemGroup>
+
 </Project>

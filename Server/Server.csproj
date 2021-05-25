@@ -6,7 +6,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DataBase\DataBase.csproj" />
       <ProjectReference Include="..\Network\Network.csproj" />
     </ItemGroup>
 

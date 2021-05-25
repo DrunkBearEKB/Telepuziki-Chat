@@ -14,7 +14,6 @@ namespace Client.UserInterface.Controls
     {
         private List<IMessage> messages;
         private List<PanelMessage> panelsMessages;
-        private ScrollBar scroll;
 
         private static int messageDefaultHeight = 40;
         private static int lineDefaultHeight = 40;

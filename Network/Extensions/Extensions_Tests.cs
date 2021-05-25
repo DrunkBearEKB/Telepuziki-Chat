@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using FakeItEasy;
 using Network.Package.ExchangingPackages;
 using NUnit.Framework;
 

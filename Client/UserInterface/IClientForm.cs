@@ -14,5 +14,7 @@ namespace Client.UserInterface
         Dictionary<string, List<IMessage>> GetHistory();
 
         void SetHistory(string id, List<IMessage> messages);
+
+        Dictionary<string, List<IMessage>> dictMessageHistory { get; }
     }
 }

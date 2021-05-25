@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using Client.Common;
+using Network.Message;
 
 namespace Client.UserInterface.Controls
 {
     public class PanelContactsBox : Panel
     {
         public List<Contact> Contacts { get; }
-        private readonly Dictionary<string, PanelContact> dictionaryPanelContacts;
+        public readonly Dictionary<string, PanelContact> dictionaryPanelContacts;
         private readonly List<PanelContact> listPanelContacts;
         private readonly IClientForm form;
 
@@ -30,22 +31,22 @@ namespace Client.UserInterface.Controls
 
         public void AddContact(Contact contact)
         {
+            Console.WriteLine($"len {this.Contacts.Count}");
             this.Contacts.Add(contact);
 
-            PanelContact panelContact = new PanelContact(this.Contacts[this.Contacts.Count - 1].Id)
+            PanelContact panelContact = new PanelContact(this.Contacts[^1].Id)
             {
-                Location = new Point(0, this.heightLabel * this.Contacts.Count),
+                Location = new Point(0, this.heightLabel * (this.Contacts.Count - 1)),
                 Size = new Size(240, this.heightLabel),
 
                 BackColor = ClientForm.Style.BackColorSecondary
             };
             panelContact.Click += new EventHandler(
-                (sender, e) =>
+                (sender, e) => 
                 {
                     this.SuspendLayout();
 
                     string idPrevious = null;
-
                     if (this.CurrentContact != null)
                     {
                         idPrevious = this.CurrentContact.Id;
@@ -53,6 +54,8 @@ namespace Client.UserInterface.Controls
                         this.listPanelContacts[this.Contacts.IndexOf(this.CurrentContact)].labelId.BackColor = ClientForm.Style.BackColorSecondary;
                         this.listPanelContacts[this.Contacts.IndexOf(this.CurrentContact)].labelLastMessage.BackColor = ClientForm.Style.BackColorSecondary;
                         this.listPanelContacts[this.Contacts.IndexOf(this.CurrentContact)].BackColor = ClientForm.Style.BackColorSecondary;
+
+                        this.listPanelContacts[this.Contacts.IndexOf(this.CurrentContact)].Selected = false;
                     }
 
                     this.CurrentContact = this.Contacts[this.listPanelContacts.IndexOf((PanelContact)sender)];
@@ -67,8 +70,10 @@ namespace Client.UserInterface.Controls
                     this.ResumeLayout();
                 });
 
+            this.form.dictMessageHistory.Add(contact.Id, new List<IMessage>());
             this.Controls.Add(panelContact);
             this.listPanelContacts.Add(panelContact);
+            this.dictionaryPanelContacts.Add(contact.Id, panelContact);
         }
 
         public void RemoveContact(Contact contact)

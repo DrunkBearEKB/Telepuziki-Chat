@@ -70,7 +70,7 @@ namespace Client {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to test1.
+        ///   Looks up a localized string similar to grisha.
         /// </summary>
         internal static string Id {
             get {

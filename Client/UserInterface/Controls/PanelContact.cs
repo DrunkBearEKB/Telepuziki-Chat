@@ -150,6 +150,8 @@ namespace Client.UserInterface.Controls
 
         public void SetLastMessage(string author, string message)
         {
+            this.SuspendLayout();
+            
             if (message.Length < 22)
             {
                 this.labelLastMessage.Text =
@@ -162,6 +164,8 @@ namespace Client.UserInterface.Controls
                     $"{(author == this.id ? author : "you")}: " +
                     $"{message.Substring(0, 14)}...";
             }
+            
+            this.ResumeLayout();
         }
 
         public void RemoveSelection()

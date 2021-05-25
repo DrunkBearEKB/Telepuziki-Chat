@@ -57,7 +57,7 @@ namespace Client.UserInterface
         private static string pathResources = "..\\..\\..\\Resources\\";
 
         private readonly ClientObject client;
-        private readonly Dictionary<string, List<IMessage>> dictMessageHistory;
+        public Dictionary<string, List<IMessage>> dictMessageHistory { get; }
         private readonly Dictionary<string, List<IMessage>> dictMessagesNotSent;
         private readonly Dictionary<string, string> dictMessageNotFinished;
 
@@ -271,10 +271,11 @@ namespace Client.UserInterface
                 ForeColor = Style.ForeColorSecondary,
                 BorderStyle = BorderStyle.FixedSingle,
                 //Multiline = true,
-                //AcceptsReturn = true,
+                AcceptsReturn = true,
                 TabStop = false
             };
-            //this.textBoxSearch.TextChanged += new EventHandler(this.TextBoxSearchTextChanged);
+            //this.textBoxSearch.TextChanged += this.TextBoxSearchTextChanged;
+            this.textBoxSearch.KeyDown += this.TextBoxSearchTextChanged;
             this.textBoxSearch.Enter += this.TextBoxSearchEnterEvent;
             this.textBoxSearch.GotFocus += this.TextBoxSearchGotFocus;
             this.textBoxSearch.LostFocus += this.TextBoxSearchLostFocus;
@@ -305,11 +306,7 @@ namespace Client.UserInterface
                 new Contact("artem"),
                 new Contact("grisha"),
                 new Contact("julia"),
-                new Contact("vova"),
-                new Contact("test5"),
-                new Contact("test6"),
-                new Contact("test7"), 
-                new Contact("test8")
+                new Contact("vova")
             };
 
             foreach (var c in contacts)
@@ -326,6 +323,7 @@ namespace Client.UserInterface
                 BackColor = Style.BackColorSecondary,
                 AutoScroll = true
             };
+            this.panelContactsBox.VerticalScroll.Minimum = 1;
             this.panelCenter.Controls.Add(this.panelContactsBox);
         }
 
@@ -384,6 +382,7 @@ namespace Client.UserInterface
                 Visible = false,
                 AutoScroll = true
             };
+            
             this.tableLayoutPanelRight.Controls.Add(this.panelChatBox, 0, 1);
 
             this.tableLayoutPanelRight.RowStyles.Add(
@@ -502,7 +501,7 @@ namespace Client.UserInterface
                 case TextMessage textMessage:
                     this.panelContactsBox.SetLastMessage(idSender, textMessage.IdAuthor, textMessage.Content);
 
-                    if (idSender == this.panelContactsBox.CurrentContact.Id)
+                    if (this.panelContactsBox.CurrentContact != null && idSender == this.panelContactsBox.CurrentContact.Id)
                     {
                         this.panelChatBox.AddMessage(textMessage);
                     }
@@ -535,8 +534,8 @@ namespace Client.UserInterface
             {
                 try
                 {
-                    Console.WriteLine("Request");
-                    this.client.RequestHistory(this.panelContactsBox.CurrentContact.Id);
+                    //Console.WriteLine("Request");
+                    //this.client.RequestHistory(this.panelContactsBox.CurrentContact.Id);
                 }
                 catch
                 {
@@ -556,6 +555,7 @@ namespace Client.UserInterface
             {
                 try
                 {
+                    Console.WriteLine($"temp={this.panelContactsBox.CurrentContact.Id}");
                     foreach (var m in this.dictMessageHistory[this.panelContactsBox.CurrentContact.Id])
                     {
                         this.panelChatBox.SuspendLayout();
@@ -574,6 +574,7 @@ namespace Client.UserInterface
                 catch
                 {
                     this.panelChatBox.Clear();
+                    break;
                 }
             }
             //this.panelChatBox.Visible = true;
@@ -654,9 +655,6 @@ namespace Client.UserInterface
                 }
             }
         }
-        
-        [DllImport("user32.dll")]
-        public static extern int FlashWindow(IntPtr Hwnd, bool Revert);
 
         private void OnTimerTick(object source, ElapsedEventArgs e)
         {
@@ -868,19 +866,31 @@ namespace Client.UserInterface
             this.ResumeLayout();
         }
 
-        private async void TextBoxSearchTextChanged(object sender, EventArgs e)
+        private async void TextBoxSearchTextChanged(object sender, KeyEventArgs e)
         {
-            if (this.textBoxSearch.Text.Contains(Environment.NewLine))
+            Console.WriteLine(this.textBoxSearch.Text);
+            if (e.KeyCode == Keys.Return)
             {
-                this.textBoxSearch.Text = this.textBoxSearch.Text.Substring(0, this.textBoxSearch.Text.Length - 1);
-                await this.client.SendSearchRequest(this.textBoxSearch.Text);
+                Console.WriteLine(123);
+                //this.textBoxSearch.Text = this.textBoxSearch.Text.Substring(0, this.textBoxSearch.Text.Length - 1);
+                //await this.client.SendSearchRequest(this.textBoxSearch.Text);
+                
+                var content = this.textBoxSearch.Text;
+                this.textBoxSearch.Clear();
+                content = content.Replace(Environment.NewLine, "");
+
+                if (!this.panelContactsBox.dictionaryPanelContacts.ContainsKey(content))
+                {
+                    this.textBoxSearch.Text = "";
+                    this.panelContactsBox.AddContact(new Contact(content));
+                }
+                //this.panelContactsBox.OnPanelClick(this.panelContactsBox.dictionaryPanelContacts[content], e);
             }
         }
 
         private async void TextBoxSearchEnterEvent(object sender, EventArgs e)
         {
-            /*this.textBoxSearch.Text = this.textBoxSearch.Text.Substring(0, this.textBoxSearch.Text.Length - 1);
-            await this.client.SendSearchRequest(this.textBoxSearch.Text);*/
+            
         }
 
         private void TextBoxSearchGotFocus(object sender, EventArgs e)

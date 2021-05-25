@@ -41,12 +41,13 @@ namespace Server.Network
             await this.stream.WriteAsync(package);
         }
 
-        public async Task StartListen()
+        public async void StartListen()
         {
             while (true)
             {
                 try
                 {
+                    Console.WriteLine(909090);
                     IPackage package = await this.ReceivePackage();
                     await this.HandleReceivedPackage(package);
                 }
@@ -87,7 +88,6 @@ namespace Server.Network
             
             if (package.IdReceiver != "")
             {
-
                 await this.server.SendPackage(package);
 
                 if (package.Type == PackageType.Text || package.Type == PackageType.Voice ||
@@ -104,10 +104,10 @@ namespace Server.Network
                     };
                     // Тут нужен текст сообщения еще
                     // Лучше в Imessage еще хранить chatId, и текст
-                    var chatId = string.Compare(this.Id, message.IdAuthor) == -1 ?
+                    /*var chatId = string.Compare(this.Id, message.IdAuthor) == -1 ?
                         $"{Id} {message.IdAuthor}" :
                         $"{message.IdAuthor} {Id}";
-                    server.dataBase.SetMessage(message, chatId);
+                    server.dataBase.SetMessage(message, chatId);*/
 
                     //this.server.ServerDataBase.AddMessage(message);
                 }
@@ -187,7 +187,7 @@ namespace Server.Network
 
         public void Dispose()
         {
-            stream?.Dispose();
+            this.stream?.Dispose();
         }
     }
 }
