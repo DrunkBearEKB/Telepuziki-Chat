@@ -13,8 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crypting", "Crypting\Crypti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataBase", "DataBase\DataBase.csproj", "{8CA2FC7E-C895-4965-A0A8-973BF3706A7F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestDataBase", "TestDataBase\TestDataBase.csproj", "{C705DA67-EDC1-4659-AFC8-B7AF3048CA72}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,10 +39,6 @@ Global
 		{8CA2FC7E-C895-4965-A0A8-973BF3706A7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CA2FC7E-C895-4965-A0A8-973BF3706A7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CA2FC7E-C895-4965-A0A8-973BF3706A7F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C705DA67-EDC1-4659-AFC8-B7AF3048CA72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C705DA67-EDC1-4659-AFC8-B7AF3048CA72}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C705DA67-EDC1-4659-AFC8-B7AF3048CA72}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C705DA67-EDC1-4659-AFC8-B7AF3048CA72}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
