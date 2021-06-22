@@ -46,6 +46,8 @@ namespace Network.Package
                     6 => new DisconnectPackage(bytesForPackage),
                     7 => new HistoryRequestPackage(bytesForPackage),
                     8 => new HistoryAnswerPackage(bytesForPackage),
+                    9 => new UsersListRequestPackage(bytesForPackage),
+                    10 => new UsersListAnswerPackage(bytesForPackage),
                     _ => null
                 };
 

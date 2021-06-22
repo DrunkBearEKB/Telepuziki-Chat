@@ -1,17 +1,17 @@
 ﻿using System;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-
+using DataBase;
 using Network.Package;
 using Network.Package.ExchangingPackages;
-
 using Server.Network;
 
 namespace Server
 {
     static class Program
     {
-        static async Task Main(string[] args)
+        public static async Task Main(string[] args)
         {
             ServerObject server = new ServerObject();
             

@@ -10,4 +10,8 @@
       <ProjectReference Include="..\Network\Network.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Castle.Windsor" Version="5.1.1" />
+    </ItemGroup>
+
 </Project>

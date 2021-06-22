@@ -31,7 +31,6 @@ namespace Client.UserInterface.Controls
 
         public void AddContact(Contact contact)
         {
-            Console.WriteLine($"len {this.Contacts.Count}");
             this.Contacts.Add(contact);
 
             PanelContact panelContact = new PanelContact(this.Contacts[^1].Id)

@@ -151,12 +151,16 @@ namespace Server.Network
                         await this.server.SendPackage(packageAnswer1);
                         break;*/
                     
-                    /*case UsersListRequestPackage usersListRequestPackage:
-                        List<string> users = this.server.ServerDataBase
-                            .GetUsersWithSimilarId(usersListRequestPackage.IdRequest);
+                    case UsersListRequestPackage usersListRequestPackage:
+                        /*List<string> users = this.server.ServerDataBase
+                            .GetUsersWithSimilarId(usersListRequestPackage.IdRequest);*/
+                        List<string> users = new List<string>()
+                        {
+                            "Artem", "Grisha", "Julia", "Vova", "temp1", "temp2", "temp3", "temp4", "temp5"
+                        };
                         UsersListAnswerPackage packageAnswer2 = new UsersListAnswerPackage(this.Id, "", users);
                         await this.server.SendPackage(packageAnswer2);
-                        break;*/
+                        break;
                 }
             }
         }

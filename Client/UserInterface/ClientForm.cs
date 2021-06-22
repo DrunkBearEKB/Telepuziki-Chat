@@ -37,8 +37,6 @@ namespace Client.UserInterface
         private TextBox textBoxSearch;
         private Label labelSearchQuestion;
         private PanelContactsBox panelContactsBox;
-        private static readonly Color ForeColorTextBoxSearch = Color.DarkGray;
-        private static readonly Color ForeColorTextBoxSearchActive = Color.White;
 
         private TableLayoutPanel tableLayoutPanelRight;
         private PanelContactInfo panelContactInfo;
@@ -207,7 +205,8 @@ namespace Client.UserInterface
                 BackColor = Style.BackColorMain,
                 ForeColor = Color.White,
                 Font = new Font(Resources.FontName, 8F, FontStyle.Regular, GraphicsUnit.Point, 204),
-                TextAlign = ContentAlignment.MiddleLeft
+                TextAlign = ContentAlignment.MiddleLeft,
+                Visible = false
             };
             this.panelLeft.Controls.Add(this.labelCpu);
 
@@ -218,7 +217,8 @@ namespace Client.UserInterface
                 BackColor = Style.BackColorMain,
                 ForeColor = Style.ForeColorMain,
                 Font = new Font(Resources.FontName, 8F, FontStyle.Regular, GraphicsUnit.Point, 204),
-                TextAlign = ContentAlignment.MiddleLeft
+                TextAlign = ContentAlignment.MiddleLeft,
+                Visible = false
             };
             this.panelLeft.Controls.Add(this.labelRam);
         }
@@ -869,17 +869,7 @@ namespace Client.UserInterface
             if (e.KeyCode == Keys.Return)
             {
                 //this.textBoxSearch.Text = this.textBoxSearch.Text.Substring(0, this.textBoxSearch.Text.Length - 1);
-                //await this.client.SendSearchRequest(this.textBoxSearch.Text);
-                
-                var content = this.textBoxSearch.Text;
-                this.textBoxSearch.Clear();
-                content = content.Replace(Environment.NewLine, "");
-
-                if (!this.panelContactsBox.dictionaryPanelContacts.ContainsKey(content))
-                {
-                    this.textBoxSearch.Text = "";
-                    this.panelContactsBox.AddContact(new Contact(content));
-                }
+                await this.client.SendSearchRequest(this.textBoxSearch.Text);
                 //this.panelContactsBox.OnPanelClick(this.panelContactsBox.dictionaryPanelContacts[content], e);
             }
         }
@@ -984,7 +974,19 @@ namespace Client.UserInterface
         
         private void OnUsersListAnswerReceive(List<string> users)
         {
+            string content = this.textBoxSearch.Text;
             
+            if (users.Contains(content))
+            {
+                this.textBoxSearch.Clear();
+                content = content.Replace(Environment.NewLine, "");
+
+                if (!this.panelContactsBox.dictionaryPanelContacts.ContainsKey(content))
+                {
+                    this.textBoxSearch.Text = "";
+                    this.panelContactsBox.AddContact(new Contact(content));
+                }
+            }
         }
     }
 }

@@ -4,7 +4,7 @@ namespace Network.Package.ExchangingPackages
 {
     public class UsersListRequestPackage : IPackage
     {
-        public PackageType Type { get; }
+        public PackageType Type => PackageType.UsersListRequest;
         public string IdReceiver { get; }
         public string IdAuthor { get; }
         public string IdRequest { get; }

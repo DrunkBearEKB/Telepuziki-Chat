@@ -5,7 +5,7 @@ namespace Network.Package.ExchangingPackages
 {
     public class UsersListAnswerPackage : IPackage
     {
-        public PackageType Type { get; }
+        public PackageType Type => PackageType.UsersListAnswer;
         public string IdReceiver { get; }
         public string IdAuthor { get; }
         public List<string> Users { get; }
@@ -17,7 +17,7 @@ namespace Network.Package.ExchangingPackages
         {
             this.IdReceiver = idReceiver;
             this.IdAuthor = idAuthor;
-            this.Users = users.ToList();
+            this.Users = users;
 
             this.RawData = PackageCreator.GetRawFormattedData(
                 this.Type,

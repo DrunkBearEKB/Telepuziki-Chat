@@ -59,7 +59,7 @@ namespace Client.UserInterface.Controls
             PanelMessage panelMessage = new PanelMessage(message)
             {
                 Dock = DockStyle.Bottom,
-                BorderStyle = BorderStyle.FixedSingle,
+                // BorderStyle = BorderStyle.FixedSingle,
                 Visible = false
             };
             this.panelsMessages.Add(panelMessage);

@@ -31,7 +31,7 @@ namespace Server.Network
             this.dictionaryConnectedClients = new Dictionary<string, ConnectedClient>();
             this.packageCreator = new PackageCreator();
             this.dataBase = new WrappedFirebase();
-            
+
             //this.LoadMessageHistory();
         }
 

@@ -8,6 +8,8 @@
         Online = 5,
         Disconnect = 6,
         HistoryRequest = 7,
-        HistoryAnswer = 8
+        HistoryAnswer = 8,
+        UsersListRequest = 9,
+        UsersListAnswer = 10
     }
 }
