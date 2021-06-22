@@ -60,8 +60,11 @@ namespace Server.Network
                 }
                 catch
                 {
-                    await this.server.Disconnect(this.Id);
-                    await this.Disconnect();
+                    if (this.stream.CanWrite)
+                    {
+                        await this.server.Disconnect(this.Id);
+                        await this.Disconnect();
+                    }
                     
                     // TODO Логика работы,в ситуации, когда происходит ошибка при попытке получения данных от клиента
                 }
@@ -126,8 +129,8 @@ namespace Server.Network
                 switch (package)
                 {
                     case DisconnectPackage:
-                        await this.server.Disconnect(this.Id);
                         await this.Disconnect();
+                        await this.server.Disconnect(this.Id);
                         break;
                 
                     /*case HistoryRequestPackage historyRequestPackage:

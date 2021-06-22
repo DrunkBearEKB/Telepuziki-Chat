@@ -20,7 +20,7 @@ namespace Client.Network
     public class ClientObject
     {
         private TcpClient tcpClient;
-        private readonly string ipServer = "10.97.129.114";  // 192.168.88.71  127.0.0.1  192.168.43.12
+        private readonly string ipServer = "192.168.1.3";  // 192.168.88.71  127.0.0.1  192.168.43.12
         private readonly int portServer = 9090;
         private System.Net.Sockets.NetworkStream stream;
         

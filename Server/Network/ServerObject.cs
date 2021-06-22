@@ -109,8 +109,8 @@ namespace Server.Network
             connectedClient.OnDisconnected += () =>
             {
                 this.OnClientDisconnected?.Invoke(connectedClient.Id);
-                this.dictionaryConnectedClients.Remove(connectedClient.Id);
-                connectedClient.Dispose();
+                //this.dictionaryConnectedClients.Remove(connectedClient.Id);
+                //connectedClient.Dispose();
             };
                     
             this.dictionaryConnectedClients.Add(connectedClient.Id, connectedClient);
