@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-
+using DataBase.Chat;
+using DataBase.User;
 using Network.Extensions;
 using Network.Message;
 using Network.Message.ExchangingMessages;
@@ -42,7 +43,7 @@ namespace Server.Network
             {
                 await this.stream.WriteAsync(package);
             }
-            catch (ObjectDisposedException)
+            catch
             {
                 await this.server.Disconnect(this.Id);
                 this.OnDisconnected?.Invoke();
@@ -117,7 +118,16 @@ namespace Server.Network
                     var chatId = string.Compare(this.Id, message.IdAuthor) == -1 ?
                         $"{Id} {message.IdAuthor}" :
                         $"{message.IdAuthor} {Id}";
-                    server.dataBase.SetMessage(message, chatId);
+                    if (!this.server.dataBase.GetUser(package.IdAuthor).Chats.Select(chat => chat.Id).Contains(chatId))
+                    {
+                        this.server.dataBase.SetChat(new Chat(chatId, "", new List<User>()
+                        {
+                            this.server.dataBase.GetUser(package.IdAuthor),
+                            this.server.dataBase.GetUser(package.IdReceiver)
+                        }));
+                    }
+                    this.server.dataBase.SetMessage(message, chatId);
+                    // Console.WriteLine(this.server.dataBase.GetChat(chatId).Messages.Count);
 
                     //this.server.ServerDataBase.AddMessage(message);
                 }
@@ -154,10 +164,11 @@ namespace Server.Network
                     case UsersListRequestPackage usersListRequestPackage:
                         /*List<string> users = this.server.ServerDataBase
                             .GetUsersWithSimilarId(usersListRequestPackage.IdRequest);*/
-                        List<string> users = new List<string>()
+                        /*List<string> users = new List<string>()
                         {
                             "Artem", "Grisha", "Julia", "Vova", "temp1", "temp2", "temp3", "temp4", "temp5"
-                        };
+                        };*/
+                        List<string> users = this.server.dataBase.GetAllUsers().Select(user => user.Id).ToList();
                         UsersListAnswerPackage packageAnswer2 = new UsersListAnswerPackage(this.Id, "", users);
                         await this.server.SendPackage(packageAnswer2);
                         break;

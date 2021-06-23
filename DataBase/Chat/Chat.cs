@@ -4,13 +4,13 @@ using Network.Message;
 
 namespace DataBase.Chat
 {
-    public class Chat : IChat
+    public class Chat
     {
         public string Id { get; }
         public string ChatTitle { get; }
-        public List<IUser> Members;
+        public List<User.User> Members;
         public List<IMessage> Messages;
-        public Chat(string id, string chatTitle, List<IUser> members)
+        public Chat(string id, string chatTitle, List<User.User> members)
         {
             Id = id;
             ChatTitle = chatTitle;

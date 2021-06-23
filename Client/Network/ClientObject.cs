@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using DataBase;
+using DataBase.Chat;
 using DataBase.User;
 using Microsoft.VisualBasic.ApplicationServices;
 using Network.Extensions;
@@ -45,7 +46,27 @@ namespace Client.Network
                 user = new User(id, "123", id);
                 dataBase.SetUser(user);
             }
-            user = response;
+            else
+            {
+                this.user = response;
+            }
+
+            if (this.user.Chats.Count == 0)
+            {
+                var chat = new Chat($"{id} {id}", "", new List<User>()
+                {
+                    user, user
+                });
+                dataBase.SetChat(chat);
+                this.user.Chats.Add(chat);
+            }
+            
+            Console.WriteLine(this.user.Chats.Count);
+            foreach (var chat in this.user.Chats)
+            {
+                Console.WriteLine(string.Join(" ", chat.Members.Select(user => user.Id)));
+            }
+            
         }
         
         public async void Start()
@@ -74,36 +95,34 @@ namespace Client.Network
             await this.SendPackage(new UsersListRequestPackage("", this.Id, idRequest));
         }
 
-        public void RequestHistory(string id)
+        public Dictionary<string, List<IMessage>> RequestHistory()
         {
+            Dictionary<string, List<IMessage>> result = new Dictionary<string, List<IMessage>>();
+            
             foreach (var chat in this.user.Chats)
             {
-                if (chat.Members.Select(u => u.Id).Contains(id))
+                if (chat.Id != $"{this.Id} {this.Id}")
+                    result.Add(chat.Members.Select(u => u.Id).First(id => id != this.Id), 
+                        chat.Messages ?? new List<IMessage>());
+                else
                 {
-                    foreach (var m in chat.Messages)
-                    {
-                        Console.WriteLine((m as TextMessage).Content);
-                    }
-                    
-                    this.OnHistoryReceive?.Invoke(id, chat.Messages);
-                    return;
+                    result.Add(this.Id, this.dataBase.GetChat($"{this.Id} {this.Id}").Messages ?? new List<IMessage>());
                 }
             }
+
+            return result;
         }
 
         private async Task SendPackage(IPackage package)
         {
-            if (package.IdAuthor == package.IdReceiver)
-            {
-                return;
-            }
-            
             try
             {
+                Console.WriteLine(package.Type);
                 await this.stream.WriteAsync(package);
             }
             catch (IOException)
             {
+                Console.WriteLine($"error {package.Type}");
                 await this.HandleDisconnect();
             }
         }

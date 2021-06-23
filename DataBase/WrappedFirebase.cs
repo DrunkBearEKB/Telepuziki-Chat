@@ -16,40 +16,38 @@ namespace DataBase
     {
         private IFirebaseClient client { get; }
 
-        public void SetChat(IChat chat)
+        public void SetChat(Chat.Chat chat)
         {
             client.Set("chats/" + chat.Id, chat);
         }
 
         public User.User GetUser(string userId)
         {
-            var response = client.Get("users/" + userId);
-            var user = response?.ResultAs<User.User>();
-            return user;
+            var response = client.Get($"users/{userId}");
+            return response?.ResultAs<User.User>();
         }
 
-        public List<IUser> GetAllUsers()
+        public List<User.User> GetAllUsers()
         {
-            var response= client.Get("users/");
-            if (response.Body == "null") return new List<IUser>();
-            var usersDict = JsonConvert.DeserializeObject<Dictionary<string, IUser>>(response.Body);
-            return usersDict.Values.ToList();
+            var response = client.Get("users/");
+            if (response.Body == "null") 
+                return new List<User.User>();
+            return JsonConvert.DeserializeObject<Dictionary<string, User.User>>(response.Body).Values.ToList();
         }
 
-        public List<IChat> GetAllChats()
+        public List<Chat.Chat> GetAllChats()
         {
-            var response= client.Get("chats/");
-            if (response.Body == "null") return new List<IChat>();
-            var usersDict = JsonConvert.DeserializeObject<Dictionary<string, IChat>>(response.Body);
-            return usersDict.Values.ToList();
+            var response = client.Get("chats/");
+            if (response.Body == "null") 
+                return new List<Chat.Chat>();
+            return JsonConvert.DeserializeObject<Dictionary<string, Chat.Chat>>(response.Body).Values.ToList();
         }
         
-        public void SetUser(IUser user) => client.Set("users/" + user.Id, user); 
-        public IChat GetChat(string chatId)
+        public void SetUser(User.User user) => client.Set($"users/{user.Id}", user);
+        public Chat.Chat GetChat(string chatId)
         {
-            var response= client.Get("chats/" + chatId);
-            var chat = response?.ResultAs<IChat>();
-            return chat;
+            var response= client.Get($"chats/{chatId}");
+            return response?.ResultAs<Chat.Chat>();
         }
 
         public void SetMessage(IMessage message, string chatId) => client.Set("chats/" + chatId, message);

@@ -55,13 +55,13 @@ namespace Client.UserInterface
         private static string pathResources = "..\\..\\..\\Resources\\";
 
         private readonly ClientObject client;
-        public Dictionary<string, List<IMessage>> dictMessageHistory { get; }
+        public Dictionary<string, List<IMessage>> dictMessageHistory { get; set; }
         private readonly Dictionary<string, List<IMessage>> dictMessagesNotSent;
         private readonly Dictionary<string, string> dictMessageNotFinished;
 
         public ClientForm()
         {
-            this.dictMessageHistory = new Dictionary<string, List<IMessage>>();
+            //this.dictMessageHistory = new Dictionary<string, List<IMessage>>();
             this.dictMessagesNotSent = new Dictionary<string, List<IMessage>>();
             this.dictMessageNotFinished = new Dictionary<string, string>();
 
@@ -76,10 +76,7 @@ namespace Client.UserInterface
             {
                 this.ramTotalAmount = Convert.ToUInt64(objram["TotalVisibleMemorySize"]);    //общая память ОЗУ
             }
-
-            this.InitializeComponent();
-            this.PerformLayout();
-
+            
             try
             {
                 this.client = new ClientObject(Resources.Id);
@@ -91,8 +88,12 @@ namespace Client.UserInterface
             }
             catch
             {
+                Console.WriteLine(123);
                 // ignored
             }
+
+            this.InitializeComponent();
+            this.PerformLayout();
 
             this.timer = new System.Timers.Timer(300);
             this.timer.Elapsed += this.OnTimerTick;
@@ -301,6 +302,7 @@ namespace Client.UserInterface
             
 
             //PanelContactsBox
+            this.dictMessageHistory = this.client.RequestHistory();
             var contacts = new List<Contact>
             {
                 new Contact("artem"),
@@ -308,11 +310,11 @@ namespace Client.UserInterface
                 new Contact("julia"),
                 new Contact("vova")
             };
-
             foreach (var c in contacts)
             {
                 this.dictMessageHistory.Add(c.Id, new List<IMessage>());
             }
+            //List<Contact> contacts = this.dictMessageHistory.Keys.Select(id => new Contact(id)).ToList();
 
             this.panelContactsBox = new PanelContactsBox(contacts, this)
             {
