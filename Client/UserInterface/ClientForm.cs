@@ -302,7 +302,8 @@ namespace Client.UserInterface
             
 
             //PanelContactsBox
-            this.dictMessageHistory = this.client.RequestHistory();
+            //this.dictMessageHistory = this.client.RequestHistory();
+            this.dictMessageHistory = new Dictionary<string, List<IMessage>>();
             var contacts = new List<Contact>
             {
                 new Contact("artem"),
