@@ -55,14 +55,14 @@ namespace Client.UserInterface
         private static string pathResources = "..\\..\\..\\Resources\\";
 
         private readonly ClientObject client;
-        public Dictionary<string, List<IMessage>> dictMessageHistory { get; set; }
-        private readonly Dictionary<string, List<IMessage>> dictMessagesNotSent;
+        public Dictionary<string, List<TextMessage>> dictMessageHistory { get; set; }
+        private readonly Dictionary<string, List<TextMessage>> dictMessagesNotSent;
         private readonly Dictionary<string, string> dictMessageNotFinished;
 
         public ClientForm()
         {
             //this.dictMessageHistory = new Dictionary<string, List<IMessage>>();
-            this.dictMessagesNotSent = new Dictionary<string, List<IMessage>>();
+            this.dictMessagesNotSent = new Dictionary<string, List<TextMessage>>();
             this.dictMessageNotFinished = new Dictionary<string, string>();
 
             Style = new BlackPinkStyle(pathResources);
@@ -302,8 +302,8 @@ namespace Client.UserInterface
             
 
             //PanelContactsBox
-            //this.dictMessageHistory = this.client.RequestHistory();
-            this.dictMessageHistory = new Dictionary<string, List<IMessage>>();
+            this.dictMessageHistory = this.client.RequestHistory();
+            /*this.dictMessageHistory = new Dictionary<string, List<IMessage>>();
             var contacts = new List<Contact>
             {
                 new Contact("artem"),
@@ -314,8 +314,8 @@ namespace Client.UserInterface
             foreach (var c in contacts)
             {
                 this.dictMessageHistory.Add(c.Id, new List<IMessage>());
-            }
-            //List<Contact> contacts = this.dictMessageHistory.Keys.Select(id => new Contact(id)).ToList();
+            }*/
+            List<Contact> contacts = this.dictMessageHistory.Keys.Select(id => new Contact(id)).ToList();
 
             this.panelContactsBox = new PanelContactsBox(contacts, this)
             {
@@ -482,7 +482,7 @@ namespace Client.UserInterface
             this.FormClosed += this.FormCloseEvent;
         }
 
-        public void AddMessage(string idSender, IMessage message)
+        public void AddMessage(string idSender, TextMessage message)
         {
             this.SuspendLayout();
 
@@ -494,7 +494,7 @@ namespace Client.UserInterface
                 }
                 else
                 {
-                    this.dictMessageHistory[idSender] = new List<IMessage>();
+                    this.dictMessageHistory[idSender] = new List<TextMessage>();
                     this.panelContactsBox.AddContact(new Contact(idSender));
                 }
             }
@@ -509,10 +509,10 @@ namespace Client.UserInterface
                         this.panelChatBox.AddMessage(textMessage);
                     }
                     break;
-                case FileMessage:
+                /*case FileMessage:
                     break;
                 case VoiceMessage:
-                    break;
+                    break;*/
             }
 
             this.ResumeLayout();
@@ -595,12 +595,12 @@ namespace Client.UserInterface
             this.labelSearchQuestion.Text = id;
         }
 
-        public Dictionary<string, List<IMessage>> GetHistory()
+        public Dictionary<string, List<TextMessage>> GetHistory()
         {
             return this.dictMessageHistory;
         }
 
-        public void SetHistory(string id, List<IMessage> messages)
+        public void SetHistory(string id, List<TextMessage> messages)
         {
             this.dictMessageHistory[id] = messages;
 
@@ -610,14 +610,14 @@ namespace Client.UserInterface
                     this.panelContactsBox.SetLastMessage(
                         id, textMessage.IdAuthor, textMessage.Content);
                     break;
-                case FileMessage fileMessage:
+                /*case FileMessage fileMessage:
                     this.panelContactsBox.SetLastMessage(
                         id, fileMessage.IdAuthor, fileMessage.File.Name);
                     break;
                 case VoiceMessage voiceMessage:
                     this.panelContactsBox.SetLastMessage(
                         id, voiceMessage.IdAuthor, "Audio message");
-                    break;
+                    break;*/
             }
         }
 
@@ -636,14 +636,14 @@ namespace Client.UserInterface
                                 case TextMessage textMessage:
                                     await this.client.SendText(textMessage.IdReceiver, textMessage.Content);
                                     break;
-                                case FileMessage fileMessage:
+                                /*case FileMessage fileMessage:
                                     byte[] buffer = new byte[1024];
                                     fileMessage.File.Read(buffer);
                                     await this.client.SendFile(fileMessage.IdReceiver, buffer);
                                     break;
                                 case VoiceMessage voiceMessage:
                                     await this.client.SendVoice(voiceMessage.IdReceiver, voiceMessage.Content);
-                                    break;
+                                    break;*/
                             }
                             
                             this.dictMessagesNotSent[id].Remove(message);
@@ -837,7 +837,7 @@ namespace Client.UserInterface
                         break;
                     }
                     
-                    IMessage message = new TextMessage(this.panelContactsBox.CurrentContact.Id, this.client.Id, DateTime.Now, cont);
+                    TextMessage message = new TextMessage(this.panelContactsBox.CurrentContact.Id, this.client.Id, DateTime.Now, cont);
 
                     try
                     {
@@ -848,7 +848,7 @@ namespace Client.UserInterface
                         if (!this.dictMessagesNotSent.ContainsKey(this.panelContactsBox.CurrentContact.Id))
                         {
                             this.dictMessagesNotSent.Add(
-                                this.panelContactsBox.CurrentContact.Id, new List<IMessage>());
+                                this.panelContactsBox.CurrentContact.Id, new List<TextMessage>());
                         }
                         this.dictMessagesNotSent[this.panelContactsBox.CurrentContact.Id].Add(message);
                     }
@@ -970,7 +970,7 @@ namespace Client.UserInterface
             this.AddMessage(idSender, message);
         }
 
-        private void OnHistoryReceive(string id, IEnumerable<IMessage> messages)
+        private void OnHistoryReceive(string id, IEnumerable<TextMessage> messages)
         {
             this.SetHistory(id, messages.ToList());
         }

@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using Client.Common;
 using Network.Message;
+using Network.Message.ExchangingMessages;
 
 namespace Client.UserInterface.Controls
 {
@@ -69,7 +70,7 @@ namespace Client.UserInterface.Controls
                     this.ResumeLayout();
                 });
 
-            this.form.dictMessageHistory.Add(contact.Id, new List<IMessage>());
+            this.form.dictMessageHistory.Add(contact.Id, new List<TextMessage>());
             this.Controls.Add(panelContact);
             this.listPanelContacts.Add(panelContact);
             this.dictionaryPanelContacts.Add(contact.Id, panelContact);

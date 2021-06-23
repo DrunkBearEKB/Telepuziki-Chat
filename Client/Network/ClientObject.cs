@@ -45,28 +45,23 @@ namespace Client.Network
             {
                 user = new User(id, "123", id);
                 dataBase.SetUser(user);
+                
             }
             else
             {
                 this.user = response;
             }
 
-            if (this.user.Chats.Count == 0)
+            if (user.Chats.Count == 0)
             {
-                var chat = new Chat($"{id} {id}", "", new List<User>()
-                {
+                var chat = new Chat($"{id} {id}", "", new List<User>() {
                     user, user
-                });
+                }, new List<TextMessage>() {new TextMessage(Id, Id, DateTime.Now, 
+                    "Привет, тут ты можешь писать сам себе)")});
                 dataBase.SetChat(chat);
                 this.user.Chats.Add(chat);
             }
-            
-            Console.WriteLine(this.user.Chats.Count);
-            foreach (var chat in this.user.Chats)
-            {
-                Console.WriteLine(string.Join(" ", chat.Members.Select(user => user.Id)));
-            }
-            
+
         }
         
         public async void Start()
@@ -95,18 +90,18 @@ namespace Client.Network
             await this.SendPackage(new UsersListRequestPackage("", this.Id, idRequest));
         }
 
-        public Dictionary<string, List<IMessage>> RequestHistory()
+        public Dictionary<string, List<TextMessage>> RequestHistory()
         {
-            Dictionary<string, List<IMessage>> result = new Dictionary<string, List<IMessage>>();
+            Dictionary<string, List<TextMessage>> result = new Dictionary<string, List<TextMessage>>();
             
             foreach (var chat in this.user.Chats)
             {
                 if (chat.Id != $"{this.Id} {this.Id}")
                     result.Add(chat.Members.Select(u => u.Id).First(id => id != this.Id), 
-                        chat.Messages ?? new List<IMessage>());
+                        chat.Messages ?? new List<TextMessage>());
                 else
                 {
-                    result.Add(this.Id, this.dataBase.GetChat($"{this.Id} {this.Id}").Messages ?? new List<IMessage>());
+                    result.Add(this.Id, this.dataBase.GetChat($"{this.Id} {this.Id}").Messages ?? new List<TextMessage>());
                 }
             }
 
@@ -274,7 +269,7 @@ namespace Client.Network
         public delegate void HistoryRequestHandler();
         public event HistoryRequestHandler OnHistoryRequest;
         
-        public delegate void HistoryAnswerHandler(string id, IEnumerable<IMessage> listMessages);
+        public delegate void HistoryAnswerHandler(string id, IEnumerable<TextMessage> listMessages);
         public event HistoryAnswerHandler OnHistoryReceive;
         
         public delegate void DisconnectFromServerForcedHandler();

@@ -7,6 +7,7 @@ using FireSharp;
 using FireSharp.Config;
 using FireSharp.Interfaces;
 using Network.Message;
+using Network.Message.ExchangingMessages;
 using Newtonsoft.Json;
 
 namespace DataBase
@@ -46,17 +47,27 @@ namespace DataBase
         public void SetUser(User.User user) => client.Set($"users/{user.Id}", user);
         public Chat.Chat GetChat(string chatId)
         {
-            var response= client.Get($"chats/{chatId}");
+            var response = client.Get($"chats/{chatId}");
             return response?.ResultAs<Chat.Chat>();
         }
 
-        public void SetMessage(IMessage message, string chatId) => client.Set("chats/" + chatId, message);
+        public void SetMessage(TextMessage message, string chatId)
+        {
+            var response = client.Get($"chats/{chatId}/");
+            if (response != null)
+            {
+                var chat = response.ResultAs<Chat.Chat>();
+                chat.Messages.Add(message);
+                SetChat(chat);
+            }
+        }
+
         public WrappedFirebase()
         {
             IFirebaseConfig config = new FirebaseConfig
             {
-                AuthSecret = "9gsNW2lkGKAs45zVdlfVFRjRp2R2RXKwBfD9RPMS",
-                BasePath = "https://chatdatabase-318d4-default-rtdb.firebaseio.com/"
+                AuthSecret = "KbWpEtBEc4rnLSNKsJEysQ3kb7QMDrB0Ht8Dws42",
+                BasePath = "https://chat-a0ca0-default-rtdb.firebaseio.com/"
             };
             client = new FirebaseClient(config);
         }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using DataBase.User;
 using Network.Message;
+using Network.Message.ExchangingMessages;
 
 namespace DataBase.Chat
 {
@@ -8,16 +9,18 @@ namespace DataBase.Chat
     {
         public string Id { get; }
         public string ChatTitle { get; }
-        public List<User.User> Members;
-        public List<IMessage> Messages;
-        public Chat(string id, string chatTitle, List<User.User> members)
+        public List<User.User> Members { get; }
+        public List<TextMessage> Messages { get; }
+
+        public Chat(string id, string chatTitle, List<User.User> members, List<TextMessage> messages)
         {
             Id = id;
             ChatTitle = chatTitle;
             Members = members;
+            Messages = messages;
         }
 
-        public List<IMessage> GetAllMessages()
+        public List<TextMessage> GetAllMessages()
         {
             return Messages;
             // Messages.Select(m => m.Text)

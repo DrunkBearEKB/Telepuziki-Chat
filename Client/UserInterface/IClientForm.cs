@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Network.Message;
+using Network.Message.ExchangingMessages;
 
 namespace Client.UserInterface
 {
@@ -7,14 +8,14 @@ namespace Client.UserInterface
     {
         void ChangeChat(string idPrevious);
 
-        void AddMessage(string idSender, IMessage message);
+        void AddMessage(string idSender, TextMessage message);
 
         void AddContactQuestion(string id);
 
-        Dictionary<string, List<IMessage>> GetHistory();
+        Dictionary<string, List<TextMessage>> GetHistory();
 
-        void SetHistory(string id, List<IMessage> messages);
+        void SetHistory(string id, List<TextMessage> messages);
 
-        Dictionary<string, List<IMessage>> dictMessageHistory { get; }
+        Dictionary<string, List<TextMessage>> dictMessageHistory { get; }
     }
 }

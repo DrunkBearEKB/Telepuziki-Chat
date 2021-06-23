@@ -113,8 +113,7 @@ namespace Server.Network
                         FilePackage filePackage => new FileMessage(this.Id, filePackage.IdAuthor, filePackage.Time,
                             filePackage.Content)
                     };
-                    // Тут нужен текст сообщения еще
-                    // Лучше в Imessage еще хранить chatId, и текст
+
                     var chatId = string.Compare(this.Id, message.IdAuthor) == -1 ?
                         $"{Id} {message.IdAuthor}" :
                         $"{message.IdAuthor} {Id}";
@@ -124,12 +123,10 @@ namespace Server.Network
                         {
                             this.server.dataBase.GetUser(package.IdAuthor),
                             this.server.dataBase.GetUser(package.IdReceiver)
-                        }));
+                        }, new List<TextMessage>() {new TextMessage(
+                            "SERVER", "SEVER", DateTime.Now, "Можете переписываться...")}));
                     }
-                    this.server.dataBase.SetMessage(message, chatId);
-                    // Console.WriteLine(this.server.dataBase.GetChat(chatId).Messages.Count);
-
-                    //this.server.ServerDataBase.AddMessage(message);
+                    this.server.dataBase.SetMessage(message as TextMessage, chatId);
                 }
                 
                 this.OnGetPackage?.Invoke(package);
@@ -143,31 +140,7 @@ namespace Server.Network
                         await this.server.Disconnect(this.Id);
                         break;
                 
-                    /*case HistoryRequestPackage historyRequestPackage:
-                        List<IMessage> messages = this.server.ServerDataBase.GetMessages(
-                            this.Id, historyRequestPackage.IdRequest, historyRequestPackage.TimeUntil);
-                        HistoryAnswerPackage packageAnswer1 = new HistoryAnswerPackage(this.Id,"", 
-                            messages.Select(message =>
-                            {
-                                Tuple<MessageType, string> result = message switch
-                                {
-                                    TextMessage textMessage => new Tuple<MessageType, string>(message.Type,
-                                        textMessage.Content),
-                                    VoiceMessage => new Tuple<MessageType, string>(message.Type, "voice message"),
-                                    FileMessage => new Tuple<MessageType, string>(message.Type, "file")
-                                };
-                                return result;
-                            }).ToList());
-                        await this.server.SendPackage(packageAnswer1);
-                        break;*/
-                    
                     case UsersListRequestPackage usersListRequestPackage:
-                        /*List<string> users = this.server.ServerDataBase
-                            .GetUsersWithSimilarId(usersListRequestPackage.IdRequest);*/
-                        /*List<string> users = new List<string>()
-                        {
-                            "Artem", "Grisha", "Julia", "Vova", "temp1", "temp2", "temp3", "temp4", "temp5"
-                        };*/
                         List<string> users = this.server.dataBase.GetAllUsers().Select(user => user.Id).ToList();
                         UsersListAnswerPackage packageAnswer2 = new UsersListAnswerPackage(this.Id, "", users);
                         await this.server.SendPackage(packageAnswer2);

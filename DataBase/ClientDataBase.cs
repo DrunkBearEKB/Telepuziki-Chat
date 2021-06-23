@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Network.Message;
+using Network.Message.ExchangingMessages;
 
 namespace DataBase
 {
@@ -10,6 +11,6 @@ namespace DataBase
         {
             db = new WrappedFirebase();
         }
-        public List<IMessage> GetMessages(string id) => db.GetChat(id).Messages;
+        public List<TextMessage> GetMessages(string id) => db.GetChat(id).Messages;
     }
 }
