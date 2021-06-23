@@ -65,7 +65,7 @@ namespace Client.UserInterface
             this.dictMessagesNotSent = new Dictionary<string, List<IMessage>>();
             this.dictMessageNotFinished = new Dictionary<string, string>();
 
-            Style = new DarkStyle(pathResources);
+            Style = new BlackPinkStyle(pathResources);
 
             this.cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
             this.ramCounter = new PerformanceCounter("Memory", "Available MBytes");

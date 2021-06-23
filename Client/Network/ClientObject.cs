@@ -122,7 +122,6 @@ namespace Client.Network
             }
             catch (IOException)
             {
-                Console.WriteLine($"error {package.Type}");
                 await this.HandleDisconnect();
             }
         }

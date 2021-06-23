@@ -10,8 +10,4 @@
       <PackageReference Include="System.Security.Permissions" Version="6.0.0-preview.3.21201.4" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Database" />
-    </ItemGroup>
-
 </Project>
